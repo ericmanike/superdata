@@ -20,6 +20,7 @@ const navItems: NavItem[] = [
   { label: "Premium Agent", href: "/dashboard/premium-agent", icon: IconSpark },
   { label: "Profile", href: "/dashboard/profile", icon: IconUser },
   { label: "My Agent Store", href: "/dashboard/my-agent-store", icon: IconStore },
+  { label: "Admin", href: "/dashboard/admin", icon: IconShield },
   { label: "Support", href: "/dashboard/support", icon: IconLifeRing },
 ];
 
@@ -160,6 +161,20 @@ function IconLifeRing() {
         strokeWidth="1.5"
         strokeLinecap="round"
       />
+    </svg>
+  );
+}
+function IconShield() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none">
+      <path
+        d="M12 3 5 5v6c0 4.5 2.9 7.9 7 9 4.1-1.1 7-4.5 7-9V5l-7-2Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M9 12.5 11 14l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

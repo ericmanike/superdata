@@ -6,16 +6,27 @@ async function getData() {
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-  const [walletRes, txRes, orderRes] = await Promise.all([
-    fetch(`${baseUrl}/api/wallet`, { cache: "no-store" }),
-    fetch(`${baseUrl}/api/transactions`, { cache: "no-store" }),
-    fetch(`${baseUrl}/api/orders`, { cache: "no-store" }),
-  ]);
+
+  async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
+    try {
+      const res = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
+      if (!res.ok) return fallback;
+      return (await res.json()) as T;
+    } catch {
+      return fallback;
+    }
+  }
+
   const [wallet, transactions, orders] = await Promise.all([
-    walletRes.json(),
-    txRes.json(),
-    orderRes.json(),
+    safeFetchJson("/api/wallet", {
+      balance: 0,
+      currency: "GHS",
+      lastUpdated: new Date().toISOString(),
+    }),
+    safeFetchJson("/api/transactions", [] as any[]),
+    safeFetchJson("/api/orders", [] as any[]),
   ]);
+
   return { wallet, transactions, orders };
 }
 
@@ -41,7 +52,7 @@ export default async function DashboardHome() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/dashboard/buy-data"
-            className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900"
+            className="rounded-full bg-linear-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900"
           >
             Quick Buy Data
           </Link>
@@ -55,7 +66,7 @@ export default async function DashboardHome() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {stats.map((stat) => (
+        {stats.map((stat:any ) => (
           <div
             key={stat.label}
             className="rounded-2xl border border-slate-200 bg-white p-5"
@@ -81,7 +92,7 @@ export default async function DashboardHome() {
             </Link>
           </div>
           <div className="space-y-3">
-            {transactions.map((tx) => (
+            {transactions.map((tx: any) => (
               <div
                 key={tx.id}
                 className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"

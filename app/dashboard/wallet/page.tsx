@@ -30,9 +30,6 @@ export default function WalletPage() {
             <button className="flex-1 rounded-xl bg-slate-900 text-white px-4 py-3 text-sm font-semibold transition hover:bg-slate-800">
               Fund wallet
             </button>
-            <button className="flex-1 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 border border-slate-200">
-              Withdraw
-            </button>
           </div>
         </div>
 
