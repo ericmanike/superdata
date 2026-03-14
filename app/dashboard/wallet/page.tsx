@@ -1,4 +1,4 @@
-import { wallet, transactions } from "@/app/lib/mockData";
+import { wallet, transactions } from "@/lib/mockData";
 import Link from "next/link";
 
 export default function WalletPage() {

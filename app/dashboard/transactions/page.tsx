@@ -1,4 +1,4 @@
-import { transactions } from "@/app/lib/mockData";
+import { transactions } from "@/lib/mockData";
 
 export default function TransactionsPage() {
   return (

@@ -1,4 +1,4 @@
-import { orders } from "@/app/lib/mockData";
+import { orders } from "@/lib/mockData";
 
 export default function OrdersPage() {
   return (

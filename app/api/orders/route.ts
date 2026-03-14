@@ -1,91 +1,156 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "@/app/lib/db";
-import type { Bundle, Order, Transaction, User, Wallet } from "@/app/lib/mockData";
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import dbConnect from "@/lib/mongoose";
+import Order from "@/lib/models/Order";
 
-function makeId(prefix: string) {
-  return `${prefix}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
 
-export async function GET() {
-  const db = await getDb();
-  const orders = await db
-    .collection<Order>("orders")
-    .find({})
-    .sort({ date: -1 })
-    .toArray();
-  return NextResponse.json(orders);
-}
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const { userId, bundleId, phone } = body ?? {};
-
-    if (!userId || !bundleId) {
-      return NextResponse.json(
-        { error: "userId and bundleId are required" },
-        { status: 400 }
-      );
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const db = await getDb();
-    const usersCollection = db.collection<User>("users");
-    const bundlesCollection = db.collection<Bundle>("bundles");
-    const ordersCollection = db.collection<Order>("orders");
-    const transactionsCollection = db.collection<Transaction>("transactions");
-    const walletsCollection = db.collection<Wallet>("wallets");
+    // const ip = session.user.id;
+    // console.log(  'order rate limit identifier:', ip)
+    // const { success } = await orderRateLimit.limit(ip);
 
-    const user = await usersCollection.findOne({ id: userId });
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    // if (!success) {
+    //   return NextResponse.json({ message: "Too many order attempts. Please try again later." }, { status: 429 });
+    // }
+
+    const { network, bundleName, price, phoneNumber, reference } = await req.json();
+
+    console.log('Received data:', { network, bundleName, price, phoneNumber, reference });
+
+    if (!network || !bundleName || !price || !phoneNumber || !reference) {
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
-    const bundle = await bundlesCollection.findOne({ id: bundleId });
-    if (!bundle) {
-      return NextResponse.json({ error: "Bundle not found" }, { status: 404 });
+    await dbConnect();
+
+    // prevent replay attack
+    const existingOrder = await Order.findOne({ transaction_id: reference });
+    if (existingOrder) {
+      return NextResponse.json({ message: "Duplicate transaction reference" }, { status: 409 });
+    }     
+    
+
+    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
+    const DAKAZI_API_KEY = process.env.DAKAZI_API_KEY
+
+    if (!PAYSTACK_SECRET_KEY || !DAKAZI_API_KEY) {
+      //console.log('Paystack secret key not found')
+      return NextResponse.json({ message: "unexpected error occurred" }, { status: 500 });
     }
 
-    const order: Order = {
-      id: makeId("ORD"),
-      userId: user.id,
-      bundleId: bundle.id,
-      phone: phone ?? user.phone,
-      status: "Processing",
-      date: new Date().toISOString(),
-      network: bundle.network,
-      bundle: bundle.size,
-      amount: bundle.price,
-    };
+    let networkId;
+    if (network === "MTN") {
+      networkId = 3;
+    } else if (network === "TELECEL") {
+      networkId = 2;
+    } else if (network.startsWith("AT")) {
+      networkId = 4;
+    } else {
+      return NextResponse.json({ message: "Invalid network" }, { status: 400 });
+    }
 
-    await ordersCollection.insertOne(order);
+    console.log('Network ID:', networkId);
+    if (!networkId) {
+      return NextResponse.json({ message: "Invalid network" }, { status: 400 });
+    }
 
-    const transaction: Transaction = {
-      id: makeId("TX"),
-      userId: user.id,
-      network: bundle.network,
-      phone: order.phone,
-      bundle: bundle.size,
-      amount: bundle.price,
-      status: "Pending",
-      date: order.date,
-    };
-    await transactionsCollection.insertOne(transaction);
 
-    await walletsCollection.updateOne(
-      { userId: user.id },
-      {
-        $inc: { balance: -bundle.price },
-        $setOnInsert: { currency: "GHS" },
-        $set: { lastUpdated: order.date },
+
+    const verifyResponse = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
       },
-      { upsert: true }
+    })
+
+    const paystackData = await verifyResponse.json()
+
+    //  console.log('Payment verification response:', paystackData)
+    if (!paystackData.data) {
+      console.log('Payment verification failed no data')
+      return NextResponse.json({ message: "Payment verification failed" }, { status: 400 });
+    }
+
+    const { amount } = paystackData.data
+    
+            const tax = 0.02 * price
+            let total = price + tax
+            console.log('Total before rounding:', total)
+            total = Math.round(total * 100)/100
+            console.log('Total after rounding:', total)
+ 
+       console.log('Payment amount:', amount / 100)
+
+    if (amount / 100 !== Number(total)) {
+      console.log('Payment amount does not match')
+      return NextResponse.json({ message: "Payment amount does not match" }, { status: 400 });
+    }
+
+     if (paystackData.data.status !== 'success') {
+      console.log('Payment verification failed')
+      return NextResponse.json({ message: "Payment verification failed" }, { status: 400 });
+    }
+
+
+     const order = await Order.create({
+      user: session.user.id,
+      transaction_id: "Paid_"+reference,
+      network: network,
+      bundleName: bundleName,
+      price: price,
+      phoneNumber: phoneNumber,
+      status: 'pending',
+    });
+
+    //place order
+    const placeOrder = await fetch(
+      "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": `${DAKAZI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          recipient_msisdn: phoneNumber,
+          network_id: networkId,
+          shared_bundle: Number(bundleName),
+          incoming_api_ref: reference
+        })
+      }
     );
 
-    return NextResponse.json(order, { status: 201 });
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid JSON payload" },
-      { status: 400 }
-    );
+    const raw = await placeOrder.text();
+    const Orderres = JSON.parse(raw);
+    console.log('Raw response:', raw);
+    console.log(Orderres);
+
+    if (!placeOrder.ok) {
+
+      return NextResponse.json({ error: ' could not place an order' }, { status: 500 });
+
+    }
+
+
+
+    console.log(' purchase order response:', Orderres)
+
+    const transaction_id = Orderres.transaction_code
+     await Order.findByIdAndUpdate(order._id, { transaction_id });    
+
+   
+
+    console.log('📦 New order created:', order);
+    return NextResponse.json({ message: "Order created successfully", order }, { status: 201 });
+  } catch (error) {
+    console.error("Order creation error:", error);
+    return NextResponse.json({ message: "Error creating order" }, { status: 500 });
   }
 }

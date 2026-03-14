@@ -1,8 +1,8 @@
 "use client";
 
-import { bundles } from "@/app/lib/mockData";
-import { BundleCard } from "@/app/components/BundleCard";
-import { PaystackModal } from "@/app/components/PaystackModal";
+import { bundles } from "@/lib/mockData";
+import { BundleCard } from "@/components/BundleCard";
+import { PaystackModal } from "@/components/PaystackModal";
 import { useMemo, useState } from "react";
 
 type Network = "All" | "MTN" | "Telecel" | "AirtelTigo";

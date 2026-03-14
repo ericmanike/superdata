@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Bundle, Network, Order, Transaction, User, Wallet } from "@/app/lib/mockData";
+import type { Bundle, Network, Order, Transaction, User, Wallet } from "@/lib/mockData";
 
 type Status = { kind: "idle" | "loading" | "success" | "error"; message?: string };
 
