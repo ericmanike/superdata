@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 const networks = [
   { name: "MTN", color: "from-amber-400 to-orange-500" },
@@ -39,45 +42,123 @@ const steps = [
 ];
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-300 text-slate-900">
-      <header className="mx-auto flex max-w-6xl items-center justify-between rounded-2xl bg-[#1e3a8a] px-6 py-6 text-white">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400 via-cyan-400 to-purple-500 text-xl font-black text-slate-900">
-            S
-          </span>
-          <div className="text-lg font-semibold tracking-tight">Superdata</div>
+      <header className="mx-auto max-w-6xl rounded-2xl bg-[#1e3a8a] px-6 py-4 text-white">
+        {/* Top bar */}
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400 via-cyan-400 to-purple-500 text-xl font-black text-slate-900">
+              S
+            </span>
+            <div className="text-lg font-semibold tracking-tight">Superdata</div>
+          </div>
+
+          {/* Desktop nav */}
+          <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
+            <a href="#home" className="text-white/90 hover:text-white transition">
+              Home
+            </a>
+            <a href="#features" className="text-white/90 hover:text-white transition">
+              Features
+            </a>
+            <a href="#pricing" className="text-white/90 hover:text-white transition">
+              Pricing
+            </a>
+            <Link href="/dashboard" className="text-white/90 hover:text-white transition">
+              Dashboard
+            </Link>
+          </nav>
+
+          {/* Desktop CTA buttons */}
+          <div className="hidden items-center gap-3 md:flex">
+            <Link
+              href="/dashboard"
+              className="rounded-full px-4 py-2 text-sm font-semibold text-white/90 ring-1 ring-white/40 transition hover:text-white"
+            >
+              Login
+            </Link>
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:translate-y-0.5"
+            >
+              Get Started
+            </Link>
+          </div>
+
+          {/* Mobile: Get Started + Hamburger */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:translate-y-0.5"
+            >
+              Get Started
+            </Link>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 transition hover:bg-white/20"
+            >
+              {menuOpen ? (
+                /* X icon */
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                /* Hamburger icon */
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
 
-        <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
-          <a href="#home" className="text-white/90 hover:text-white">
-            Home
-          </a>
-          <a href="#features" className="text-white/90 hover:text-white">
-            Features
-          </a>
-          <a href="#pricing" className="text-white/90 hover:text-white">
-            Pricing
-          </a>
-          <Link href="/dashboard" className="text-white/90 hover:text-white">
-            Dashboard
-          </Link>
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Link
-            href="/dashboard"
-            className="hidden rounded-full px-4 py-2 text-sm font-semibold text-white/90 ring-1 ring-white/40 transition hover:text-white md:inline-flex"
-          >
-            Login
-          </Link>
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:translate-y-0.5"
-          >
-            Get Started
-          </Link>
-        </div>
+        {/* Mobile menu dropdown */}
+        {menuOpen && (
+          <nav className="mt-4 flex flex-col gap-1 border-t border-white/20 pt-4 md:hidden">
+            <a
+              href="#home"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
+            >
+              Home
+            </a>
+            <a
+              href="#features"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
+            >
+              Features
+            </a>
+            <a
+              href="#pricing"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
+            >
+              Pricing
+            </a>
+            <Link
+              href="/dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
+            >
+              Dashboard
+            </Link>
+            <div className="mt-2 border-t border-white/20 pt-3">
+              <Link
+                href="/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="block w-full rounded-full py-2.5 text-center text-sm font-semibold text-white/90 ring-1 ring-white/40 transition hover:text-white"
+              >
+                Login
+              </Link>
+            </div>
+          </nav>
+        )}
       </header>
 
       <main id="home" className="mx-auto mt-6 max-w-6xl px-6 pb-16">
