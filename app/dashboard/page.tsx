@@ -52,7 +52,7 @@ export default async function DashboardHome() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/dashboard/buy-data"
-            className="rounded-full bg-linear-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900"
+            className="rounded-full bg-[#00caf5] px-5 py-2 text-sm font-semibold text-slate-900 transition hover:opacity-90"
           >
             Quick Buy Data
           </Link>
@@ -162,7 +162,7 @@ export default async function DashboardHome() {
       <div className="flex justify-center">
         <Link
           href="/dashboard/buy-data"
-          className="inline-flex items-center gap-3 rounded-full bg-linear-to-r from-cyan-400 to-violet-500 px-7 py-4 text-base font-semibold text-slate-900"
+          className="inline-flex items-center gap-3 rounded-full bg-[#00caf5] px-7 py-4 text-base font-semibold text-slate-900 transition hover:opacity-90"
         >
           View data packages
         </Link>

@@ -181,15 +181,6 @@ export default function AdminPage() {
               { label: "Bundles", value: bundles.length },
               { label: "Orders", value: orders.length },
               { label: "Pending orders", value: orders.filter((o) => o.status !== "Delivered").length },
-              { label: "Transactions", value: transactions.length },
-              {
-                label: "Success rate",
-                value: `${Math.round(
-                  transactions.length
-                    ? (transactions.filter((t) => t.status === "Success").length / transactions.length) * 100
-                    : 0
-                )}%`,
-              },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -199,27 +190,6 @@ export default function AdminPage() {
                 <p className="text-xl font-bold text-slate-900">{stat.value}</p>
               </div>
             ))}
-          </div>
-          <div className="mt-4 space-y-2">
-            <p className="text-xs font-semibold text-slate-600">Recent users</p>
-            <div className="space-y-2 max-h-40 overflow-auto pr-1">
-              {users.map((u) => (
-                <div
-                  key={u.id}
-                  className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">{u.name}</span>
-                    <span className="text-xs text-slate-500">{u.id}</span>
-                  </div>
-                  <p className="text-xs text-slate-600">{u.email}</p>
-                  <p className="text-xs text-slate-600">{u.phone}</p>
-                  <p className="text-xs font-semibold text-slate-800">
-                    Wallet: ₵{u.walletBalance?.toFixed?.(2) ?? u.walletBalance}
-                  </p>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 
@@ -271,8 +241,8 @@ export default function AdminPage() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wide text-slate-500">Activity</p>
-            <h2 className="text-lg font-semibold">Latest transactions</h2>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Inventory & Fulfillment</p>
+            <h2 className="text-lg font-semibold">All orders</h2>
           </div>
           <button
             onClick={refreshAll}
@@ -282,34 +252,95 @@ export default function AdminPage() {
           </button>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {transactions.map((tx) => (
+          {orders.map((order) => (
             <div
-              key={tx.id}
+              key={order.id}
               className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
             >
               <div className="flex items-center justify-between">
                 <span className="font-semibold">
-                  {tx.network} • {tx.bundle}
+                  {order.network} • {order.bundle}
                 </span>
                 <span
                   className={`text-xs font-semibold ${
-                    tx.status === "Success"
+                    order.status === "Delivered"
                       ? "text-emerald-700"
-                      : tx.status === "Pending"
+                      : order.status === "Processing" || order.status === "Pending"
                         ? "text-amber-700"
                         : "text-rose-700"
                   }`}
                 >
-                  {tx.status}
+                  {order.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-600">{tx.phone}</p>
+              <p className="text-xs text-slate-600">{order.phone}</p>
               <div className="mt-1 flex items-center justify-between text-xs text-slate-700">
-                <span>₵{tx.amount}</span>
-                <span>{new Date(tx.date).toLocaleString()}</span>
+                <span>₵{order.amount}</span>
+                <span>{new Date(order.date).toLocaleString()}</span>
               </div>
             </div>
           ))}
+          {orders.length === 0 && (
+            <p className="col-span-full py-8 text-center text-sm text-slate-500">
+              No orders found.
+            </p>
+          )}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <header className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Directory</p>
+            <h2 className="text-lg font-semibold">All users</h2>
+          </div>
+          <button
+            onClick={refreshAll}
+            className="text-xs font-semibold text-[#1e3a8a] hover:underline"
+          >
+            Update list
+          </button>
+        </header>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {users.map((u) => (
+            <div
+              key={u.id}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-slate-300"
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-bold text-slate-900">{u.name}</h3>
+                  <p className="text-xs text-slate-500">{u.id}</p>
+                </div>
+                <div className="rounded-lg bg-white px-2 py-1 text-xs font-bold text-[#1e3a8a] shadow-xs">
+                  ₵{u.walletBalance?.toFixed?.(2) ?? u.walletBalance}
+                </div>
+              </div>
+              <div className="mt-3 space-y-1">
+                <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <span className="font-semibold text-slate-400">Email:</span>
+                  {u.email}
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-600">
+                  <span className="font-semibold text-slate-400">Phone:</span>
+                  {u.phone}
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button className="flex-1 rounded-lg bg-white border border-slate-200 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">
+                  View wallet
+                </button>
+                <button className="flex-1 rounded-lg bg-white border border-slate-200 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">
+                  Resend info
+                </button>
+              </div>
+            </div>
+          ))}
+          {users.length === 0 && (
+            <p className="col-span-full py-8 text-center text-sm text-slate-500">
+              No users registered yet.
+            </p>
+          )}
         </div>
       </section>
     </div>
