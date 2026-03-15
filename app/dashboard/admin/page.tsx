@@ -40,6 +40,7 @@ export default function AdminPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [dakaziBalance, setDakaziBalance] = useState<any>(null);
 
   const normalizedBundles = useMemo(() => {
     if (!Array.isArray(bundles)) return [];
@@ -61,6 +62,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     refreshAll();
+    balance();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -153,6 +155,18 @@ export default function AdminPage() {
     }
   }
 
+const balance = async () => {
+  const response = await fetch(`/api/testingDakazi`,{
+    method: "GET",
+    next: { revalidate: 0 } // Ensure it's not cached too aggressively
+  })
+  const data = await response.json()
+  console.log("  Data from Dakazi API " , data)
+  setDakaziBalance(data)
+}
+
+
+
   return (
     <div className="space-y-8 text-slate-900">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -236,7 +250,6 @@ export default function AdminPage() {
               Add bundle
             </button>
           </form>
-
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -247,7 +260,7 @@ export default function AdminPage() {
             </div>
             <div className="text-right">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                My Balance
+                Admin Wallet
               </p>
               <p className="text-xl font-black text-emerald-600">
                 ₵{users.find(u => u.id === session?.user?.id)?.walletBalance?.toFixed(2) || "0.00"}
@@ -259,7 +272,7 @@ export default function AdminPage() {
               { label: "Users", value: users.length },
               { label: "Bundles", value: bundles.length },
               { label: "Orders", value: orders.length },
-              { label: "Pending orders", value: orders.filter((o) => o.status !== "Delivered").length },
+              { label: "Pending", value: orders.filter((o) => o.status !== "Delivered").length },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -272,119 +285,99 @@ export default function AdminPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3">
-          <header className="mb-4 flex items-center justify-between">
+        <section className="rounded-2xl border border-blue-100 bg-blue-50/50 p-5 shadow-sm">
+          <header className="mb-3 flex items-start justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Inventory</p>
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                Active data packages
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
-                  {normalizedBundles.length}
-                </span>
-              </h2>
+              <p className="text-[10px] uppercase tracking-wide text-blue-600 font-bold">API Provider</p>
+              <h2 className="text-lg font-semibold text-blue-900 leading-none">Dakazi Balance</h2>
             </div>
-            <button
-              onClick={refreshAll}
-              className="text-xs font-semibold text-[#1e3a8a] hover:underline"
+            {/* <button
+              onClick={balance}
+              className="rounded-full bg-blue-100 px-3 py-1 text-[10px] font-bold text-blue-700 hover:bg-blue-200 transition-colors"
             >
-              Update list
-            </button>
+              Sync
+            </button> */}
           </header>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {normalizedBundles.map((b: any) => (
-              <div
-                key={b.id}
-                className="flex flex-col justify-between rounded-[10px] border border-slate-200 bg-white p-6 min-h-[220px] shadow-sm transition-shadow hover:shadow-md"
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${
-                      b.network === "MTN" ? "text-slate-900" : "text-white"
-                    } ${
-                      networkColors[b.network] ?? "bg-slate-900"
-                    }`}
-                  >
-                    {b.network}
-                  </span>
-                  <div className="text-right">
-                    <p className="text-sm font-semibold text-[#1e3a8a]">₵{b.price}</p>
-                    <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                      b.audience === 'agent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                    }`}>
-                      {b.audience === 'agent' ? 'Agent' : 'User'}
-                    </span>
-                  </div>
-                </div>
-                
-                <div className="mt-3">
-                  <div className="text-2xl font-bold text-slate-900">{b.size}</div>
-                  <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md mt-1">
-                    <Check size={10} strokeWidth={3} />
-                    <span>None expire</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => deleteBundle(b.id)}
-                  className="mt-4 w-full rounded-xl bg-white border border-rose-100 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 hover:border-rose-300"
-                >
-                  Delete Package
-                </button>
-              </div>
-            ))}
-            {normalizedBundles.length === 0 && (
-              <p className="col-span-full py-8 text-center text-sm text-slate-500">
-                No bundles created yet.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <header className="mb-3 flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-slate-500">Accounts</p>
-              <h2 className="text-lg font-semibold">Wallet balances</h2>
-            </div>
-            <button
-              onClick={refreshAll}
-              className="text-xs font-semibold text-[#1e3a8a] hover:underline"
-            >
-              Refresh
-            </button>
-          </header>
-          <div className="space-y-2 max-h-72 overflow-auto pr-1">
-            {wallets.map((w) => {
-              const owner = users.find((u) => u.id === w.userId);
-              return (
-                <div
-                  key={w.userId}
-                  className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
-                >
-                  <div>
-                    <p className="font-semibold">{owner?.name ?? "Unknown user"}</p>
-                    <p className="text-xs text-slate-600">
-                      {owner?.phone ?? "N/A"} · {owner?.email ?? w.userId}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-base font-bold text-slate-900">
-                      ₵{w.balance.toFixed(2)}
-                    </p>
-                    <p className="text-[11px] text-slate-500">
-                      Updated {new Date(w.lastUpdated).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-            {wallets.length === 0 && (
-              <p className="text-sm text-slate-600">No wallet records yet.</p>
-            )}
+          <div className="mt-8">
+             <div className="flex items-baseline gap-1">
+               <span className="text-2xl font-black text-blue-600">₵</span>
+               <span className="text-4xl font-black text-blue-900 tracking-tight">
+                 {dakaziBalance?.AccountBalance?.["Wallet Balance"] || "0.00"}
+               </span>
+             </div>
+            
           </div>
         </section>
       </div>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <header className="mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-slate-500">Inventory</p>
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              Active data packages
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                {normalizedBundles.length}
+              </span>
+            </h2>
+          </div>
+          <button
+            onClick={refreshAll}
+            className="text-xs font-semibold text-[#1e3a8a] hover:underline"
+          >
+            Update list
+          </button>
+        </header>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {normalizedBundles.map((b: any) => (
+            <div
+              key={b.id}
+              className="flex flex-col justify-between rounded-[10px] border border-slate-200 bg-white p-6 min-h-[220px] shadow-sm transition-shadow hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-bold ${
+                    b.network === "MTN" ? "text-slate-900" : "text-white"
+                  } ${
+                    networkColors[b.network] ?? "bg-slate-900"
+                  }`}
+                >
+                  {b.network}
+                </span>
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-[#1e3a8a]">₵{b.price}</p>
+                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                    b.audience === 'agent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {b.audience === 'agent' ? 'Agent' : 'User'}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="mt-3">
+                <div className="text-2xl font-bold text-slate-900">{b.size}</div>
+                <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md mt-1">
+                  <Check size={10} strokeWidth={3} />
+                  <span>None expire</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => deleteBundle(b.id)}
+                className="mt-4 w-full rounded-xl bg-white border border-rose-100 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 hover:border-rose-300"
+              >
+                Delete Package
+              </button>
+            </div>
+          ))}
+          {normalizedBundles.length === 0 && (
+            <p className="col-span-full py-8 text-center text-sm text-slate-500">
+              No bundles created yet.
+            </p>
+          )}
+        </div>
+      </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between">
