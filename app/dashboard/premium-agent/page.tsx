@@ -17,7 +17,7 @@ export default function PremiumAgentPage() {
             <li>• Dedicated account manager</li>
             <li>• White-label storefront for your customers</li>
           </ul>
-          <button className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-violet-500 px-4 py-3 text-sm font-semibold text-slate-900">
+          <button className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#FFD700] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:opacity-90">
             <svg
               viewBox="0 0 24 24"
               className="h-4 w-4"
