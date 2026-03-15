@@ -289,7 +289,7 @@ const balance = async () => {
           <header className="mb-3 flex items-start justify-between">
             <div>
               <p className="text-[10px] uppercase tracking-wide text-blue-600 font-bold">API Provider</p>
-              <h2 className="text-lg font-semibold text-blue-900 leading-none">Dakazi Balance</h2>
+              <h2 className="text-lg font-semibold text-blue-900 leading-none">Dakazina</h2>
             </div>
             {/* <button
               onClick={balance}
