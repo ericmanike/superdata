@@ -89,7 +89,7 @@ export default function DashboardLayout({
         }`}
       >
         <div className="flex items-center justify-between px-2">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-xl font-black text-slate-900">
               S
             </span>
@@ -99,13 +99,13 @@ export default function DashboardLayout({
                 {session?.user?.role || "User"}
               </div>
             </div>
-          </div>
-            <button
-              className="md:hidden text-white"
-              onClick={() => setOpen(false)}
-            >
-              <X size={20} />
-            </button>
+          </Link>
+          <button
+            className="md:hidden text-white"
+            onClick={() => setOpen(false)}
+          >
+            <X size={20} />
+          </button>
         </div>
 
         <nav className="mt-8 space-y-1 text-white text-base">

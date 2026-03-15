@@ -52,7 +52,7 @@ export default async function WalletPage() {
         </div>
         <Link
           href="/dashboard/buy-data"
-          className="rounded-full bg-[#00caf5] px-5 py-2 text-sm font-semibold text-slate-900 transition hover:opacity-90"
+          className="rounded-full bg-[#00c9f5] px-5 py-2 text-sm font-semibold text-slate-900 transition hover:opacity-90"
         >
           Buy Data
         </Link>
@@ -68,7 +68,7 @@ export default async function WalletPage() {
             Updated {new Date(wallet.lastUpdated).toLocaleString()}
           </p>
           <div className="mt-4 flex gap-3">
-            <TopUpWallet className="flex-1 rounded-xl bg-[#00caf5] text-slate-900 px-4 py-3 text-sm font-semibold transition hover:opacity-90 text-center cursor-pointer">
+            <TopUpWallet className="flex-1 rounded-xl bg-[#00c9f5] text-slate-900 px-4 py-3 text-sm font-semibold transition hover:opacity-90 text-center cursor-pointer">
               Fund wallet
             </TopUpWallet>
           </div>

@@ -42,7 +42,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/dashboard/buy-data"
-                className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 px-8 py-3.5 text-base font-bold text-slate-900 transition hover:translate-y-0.5 shadow-lg"
+                className="rounded-full bg-[#00c9f5] px-8 py-3.5 text-base font-bold text-slate-900 transition hover:translate-y-0.5 shadow-lg"
               >
                 Buy Data
               </Link>
@@ -115,28 +115,37 @@ export default function Home() {
             </ul>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            {bundles.map((bundle) => (
-              <div
-                key={bundle.size + bundle.network}
-                className="rounded-2xl border border-slate-200 bg-white p-6"
-              >
-                <p className="text-sm text-slate-600">{bundle.network}</p>
-                <div className="mt-2 text-2xl font-bold text-slate-900">
-                  {bundle.size}
+            {bundles.map((bundle) => {
+              const networkColors: { [key: string]: { border: string, bg: string, text: string } } = {
+                'MTN': { border: 'border-l-[#FFCC00]', bg: 'bg-[#FFCC00]/5', text: 'text-[#8B7200]' },
+                'AirtelTigo': { border: 'border-l-[#0072bc]', bg: 'bg-[#0072bc]/5', text: 'text-[#005a96]' },
+                'Telecel': { border: 'border-l-[#E60000]', bg: 'bg-[#E60000]/5', text: 'text-[#b30000]' }
+              };
+              const colors = networkColors[bundle.network] || { border: 'border-l-slate-200', bg: 'bg-white', text: 'text-slate-600' };
+
+              return (
+                <div
+                  key={bundle.size + bundle.network}
+                  className={`rounded-2xl border border-slate-200 border-l-4 ${colors.border} ${colors.bg} p-6 transition-all hover:shadow-md`}
+                >
+                  <p className={`text-xs font-bold uppercase tracking-wider ${colors.text}`}>{bundle.network}</p>
+                  <div className="mt-2 text-2xl font-black text-slate-900">
+                    {bundle.size}
+                  </div>
+                  <div className="mt-6 flex items-center justify-between">
+                    <span className="text-xl font-bold text-slate-900">
+                      {bundle.price}
+                    </span>
+                    <Link
+                      href="/dashboard/buy-data"
+                      className={`rounded-full  px-4 py-2 text-xs font-bold text-white transition ${colors.text}`}
+                    >
+                      Buy now →
+                    </Link>
+                  </div>
                 </div>
-                <div className="mt-6 flex items-center justify-between">
-                  <span className="text-lg font-semibold text-[#1e3a8a]">
-                    {bundle.price}
-                  </span>
-                  <Link
-                    href="/dashboard/buy-data"
-                    className="text-sm font-semibold text-[#1e3a8a] hover:underline"
-                  >
-                    Buy now →
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -146,15 +155,15 @@ export default function Home() {
             {steps.map((step, idx) => (
               <div
                 key={step.title}
-                className="relative rounded-2xl border border-slate-200 bg-white p-5"
+                className="relative rounded-2xl bg-[#1e3a8a] p-5 shadow-lg"
               >
-                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#1e3a8a]/10 text-base font-bold text-[#1e3a8a]">
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-base font-bold text-white">
                   {idx + 1}
                 </div>
-                <h3 className="text-lg font-semibold text-slate-900">
+                <h3 className="text-lg font-semibold text-white">
                   {step.title}
                 </h3>
-                <p className="text-sm text-slate-700">{step.detail}</p>
+                <p className="text-sm text-white/80">{step.detail}</p>
               </div>
             ))}
           </div>

@@ -9,7 +9,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="w-full rounded-none bg-[#1e3a8a] px-6 py-4 text-white">
+    <header className="sticky top-0 z-50 w-full rounded-none bg-[#1e3a8a] px-6 py-4 text-white shadow-md">
       {/* Top bar */}
       <div className="flex items-center justify-between">
         {/* Logo */}
@@ -29,10 +29,10 @@ export function Navbar() {
           <a href="#pricing" className="text-white/90 hover:text-white transition">
             See Pricing
           </a>
-          <a href="https://wa.me/233555555555" target="_blank" className="text-white/90 hover:text-white transition flex items-center gap-2">
+          <a href="https://wa.me/233531727714" target="_blank" className="text-white/90 hover:text-white transition flex items-center gap-2">
           <MessageSquareCheck/> Contact  Us
           </a> 
-        <a href="https://wa.me/233555555555" target="_blank" className="text-white/90 hover:text-white transition flex items-center gap-2">
+        <a href="https://wa.me/233531727714" target="_blank" className="text-white/90 hover:text-white transition flex items-center gap-2">
           <Users/> Community
         </a>
 
@@ -91,7 +91,7 @@ export function Navbar() {
             See Pricing
           </a>
           <a
-            href="https://wa.me/233555555555"
+            href="https://wa.me/233531727714"
             target="_blank"
             onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
@@ -99,7 +99,7 @@ export function Navbar() {
             <MessageSquareCheck size={18} /> Contact Us
           </a>
           <a
-            href="https://wa.me/233555555555"
+            href="https://wa.me/233531727714"
             target="_blank"
             onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
