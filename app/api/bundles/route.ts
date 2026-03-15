@@ -3,22 +3,27 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
 import Bundle from "@/lib/models/Bundle";
+import { Console } from "console";
 
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
+      console.log("Unauthorized NO SESSION");
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+
     }
 
     await dbConnect();
     const bundles = await Bundle.find({});
+    console.log(`Found ${bundles.length} bundles in database`);
     
-    const normalizedBundles = bundles.map(b => ({
-      id: b._id.toString(),
-      network: b.network,
-      size: b.name,
-      price: b.price
+    const normalizedBundles = bundles.map((b: any) => ({
+      id: (b._id || b.id)?.toString(),
+      network: b.network || "MTN",
+      size: b.name || b.size || "Standard", 
+      price: b.price || 0,
+      audience: b.audience || "user"
     }));
 
     return NextResponse.json(normalizedBundles);

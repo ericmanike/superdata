@@ -1,5 +1,8 @@
 "use client";
 
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+
 type ModalProps = {
   open: boolean;
   onClose: () => void;
@@ -9,7 +12,73 @@ type ModalProps = {
 };
 
 export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: ModalProps) {
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (open) {
+      if (!(window as any).PaystackPop) {
+        const script = document.createElement("script");
+        script.src = "https://js.paystack.co/v1/inline.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, [open]);
+
   if (!open || !summary) return null;
+
+  const handlePayment = () => {
+    if (!session?.user?.email) {
+      alert("Please login to purchase");
+      return;
+    }
+    if (!phone) {
+      alert("Please enter a phone number");
+      return;
+    }
+
+    const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    if (!paystackKey) {
+      alert("Payment system error: Key missing");
+      return;
+    }
+
+    const handler = (window as any).PaystackPop.setup({
+      key: paystackKey,
+      email: session.user.email,
+      amount: Math.round((summary.price + summary.price * 0.02) * 100), // GHS to pesewas + 2% tax
+      currency: "GHS",
+      ref: "DATA_" + Date.now(),
+      callback: async (response: any) => {
+        try {
+          const res = await fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              network: summary.network,
+              bundleName: summary.size,
+              price: summary.price,
+              phoneNumber: phone,
+              reference: response.reference,
+            }),
+          });
+          if (res.ok) {
+            alert("Purchase successful!");
+            window.location.href = "/dashboard/orders";
+          } else {
+            const err = await res.json();
+            alert("Error: " + (err.message || "Failed to process order"));
+          }
+        } catch (e) {
+          alert("Network error processing order");
+        }
+      },
+      onClose: () => {
+        console.log("Window closed");
+      },
+    });
+    handler.openIframe();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
@@ -48,7 +117,10 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
           </div>
         </div>
 
-        <button className="mt-4 w-full rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white">
+        <button 
+          onClick={handlePayment}
+          className="mt-4 w-full rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white"
+        >
           Pay with Paystack
         </button>
         <p className="mt-2 text-xs text-slate-500">

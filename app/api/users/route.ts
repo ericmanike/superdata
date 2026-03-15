@@ -34,3 +34,25 @@ export async function GET() {
     return NextResponse.json({ message: "Error fetching users" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== 'admin') {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const { userId } = await req.json();
+    if (!userId) {
+      return NextResponse.json({ message: "User ID is required" }, { status: 400 });
+    }
+
+    await dbConnect();
+    await User.findByIdAndDelete(userId);
+
+    return NextResponse.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete user error:", error);
+    return NextResponse.json({ message: "Error deleting user" }, { status: 500 });
+  }
+}

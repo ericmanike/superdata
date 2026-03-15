@@ -6,8 +6,7 @@ export default function PremiumAgentPage() {
         <h1 className="text-2xl font-bold text-slate-900">Premium Agent</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 max-w-md">
           <h2 className="text-lg font-semibold text-slate-900">
             Premium perks included
           </h2>
@@ -30,17 +29,6 @@ export default function PremiumAgentPage() {
             Upgrade now
           </button>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <h2 className="text-lg font-semibold text-slate-900">Requirements</h2>
-          <ul className="mt-4 space-y-2 text-sm text-slate-700">
-            <li>• Minimum 100 successful orders in 30 days</li>
-            <li>• Valid business registration or ID</li>
-            <li>• Verified phone & email</li>
-            <li>• Average delivery success above 98%</li>
-          </ul>
-        </div>
-      </div>
     </div>
   );
 }

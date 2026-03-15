@@ -1,9 +1,37 @@
-import { wallet, transactions } from "@/lib/mockData";
 import Link from "next/link";
-
 import TopUpWallet from "@/components/ui/topUpwallet";
 
-export default function WalletPage() {
+export const dynamic = "force-dynamic";
+
+async function getData() {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+  async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
+    try {
+      const res = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
+      if (!res.ok) return fallback;
+      return (await res.json()) as T;
+    } catch {
+      return fallback;
+    }
+  }
+
+  const [wallet, transactions] = await Promise.all([
+    safeFetchJson("/api/wallet", {
+      balance: 0,
+      currency: "GHS",
+      lastUpdated: new Date().toISOString(),
+    }),
+    safeFetchJson("/api/transactions", [] as any[]),
+  ]);
+
+  return { wallet, transactions };
+}
+
+export default async function WalletPage() {
+  const { wallet, transactions } = await getData();
   return (
     <div className="space-y-6 text-slate-900">
       <div className="flex items-center justify-between">

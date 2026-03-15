@@ -21,6 +21,7 @@ import {
   X
 } from "lucide-react";
 import TopUpWallet from "@/components/ui/topUpwallet";
+import { signOut, useSession } from "next-auth/react";
 
 type NavItem = {
   label: string;
@@ -66,6 +67,11 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/" });
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-300 text-slate-900">
@@ -84,7 +90,7 @@ export default function DashboardLayout({
       >
         <div className="flex items-center justify-between px-2">
           <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-linear-to-br from-emerald-400 via-cyan-400 to-purple-500 text-xl font-black text-slate-900">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-xl font-black text-slate-900">
               S
             </span>
             <div>
@@ -123,7 +129,10 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <button className="mt-6 flex w-full items-center justify-between rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/20">
+        <button 
+          onClick={handleLogout}
+          className="mt-6 flex w-full items-center justify-between rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/20"
+        >
           <div className="flex items-center">
             <IconWrapper>
               <LogOut size={18} />
@@ -144,10 +153,10 @@ export default function DashboardLayout({
               <Menu size={18} />
               Dashboard
             </button>
-            <div>
-              <p className="text-xs text-slate-500">Welcome back</p>
-              <p className="text-sm font-semibold text-slate-900">Data Agent</p>
-            </div>
+             <div>
+               <p className="text-xs text-slate-500">Welcome</p>
+               <p className="text-sm font-semibold text-slate-900">{session?.user?.name || "User"}</p>
+             </div>
           </div>
 
           <div className="flex items-center gap-3">

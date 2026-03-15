@@ -1,24 +1,43 @@
 "use client";
 
-import { bundles } from "@/lib/mockData";
 import { BundleCard } from "@/components/BundleCard";
 import { PaystackModal } from "@/components/PaystackModal";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Network = "All" | "MTN" | "Telecel" | "AirtelTigo";
 
 export default function BuyDataPage() {
+  const [bundles, setBundles] = useState<any[]>([]);
   const [phone, setPhone] = useState("");
-  const [bundleId, setBundleId] = useState(bundles[0]?.id ?? "");
+  const [bundleId, setBundleId] = useState("");
   const [filter, setFilter] = useState<Network>("All");
   const [showPayModal, setShowPayModal] = useState(false);
 
-  const filteredBundles = useMemo(() => {
-    if (filter === "All") return bundles;
-    return bundles.filter((b) => b.network === filter);
-  }, [filter]);
+  useEffect(() => {
+    fetch("/api/bundles")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setBundles(data);
+          if (data.length > 0) setBundleId(data[0].id);
+        } else {
+          console.error("Bundles API did not return an array:", data);
+          setBundles([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching bundles:", err);
+        setBundles([]);
+      });
+  }, []);
 
-  const selectedBundle = bundles.find((b) => b.id === bundleId);
+  const filteredBundles = useMemo(() => {
+    const list = Array.isArray(bundles) ? bundles : [];
+    if (filter === "All") return list;
+    return list.filter((b) => b.network === filter);
+  }, [filter, bundles]);
+
+  const selectedBundle = Array.isArray(bundles) ? bundles.find((b) => b.id === bundleId) : null;
 
   return (
     <div className="space-y-6 text-slate-900">

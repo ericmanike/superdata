@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import { signOut, useSession } from "next-auth/react";
 
 export default function ProfilePage() {
-  const [name, setName] = useState("Data Agent");
-  const [phone, setPhone] = useState("024 123 4567");
-  const [email, setEmail] = useState("agent@superdata.africa");
+  const { data: session } = useSession();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    if (session?.user) {
+      setName(session.user.name || "");
+      setEmail(session.user.email || "");
+    }
+  }, [session]);
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/" });
+  };
 
   return (
     <div className="space-y-6 text-slate-900">
@@ -63,23 +75,14 @@ export default function ProfilePage() {
               </button>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <p className="font-semibold text-slate-900">Two-factor</p>
-              <p className="text-xs text-slate-600">
-                Add SMS verification for payouts and wallet actions.
-              </p>
-              <button className="mt-3 rounded-lg px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-900/20">
-                Enable 2FA
-              </button>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="font-semibold text-slate-900">Logout</p>
               <p className="text-xs text-slate-600">End your session securely.</p>
-              <Link
-                href="/logout"
+              <button
+                onClick={handleLogout}
                 className="mt-3 inline-flex w-full items-center justify-center rounded-lg  bg-[#f54a00] px-4 py-2 text-sm font-semibold text-white"
               >
                 Logout
-              </Link>
+              </button>
             </div>
           </div>
         </div>

@@ -1,6 +1,27 @@
-import { transactions } from "@/lib/mockData";
 
-export default function TransactionsPage() {
+export const dynamic = "force-dynamic";
+
+async function getData() {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+  async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
+    try {
+      const res = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
+      if (!res.ok) return fallback;
+      return (await res.json()) as T;
+    } catch {
+      return fallback;
+    }
+  }
+
+  const transactions = await safeFetchJson("/api/transactions", [] as any[]);
+  return { transactions };
+}
+
+export default async function TransactionsPage() {
+  const { transactions } = await getData();
   return (
     <div className="space-y-6 text-slate-900">
       <div>

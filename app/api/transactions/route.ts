@@ -12,8 +12,13 @@ export async function GET() {
     }
 
     await dbConnect();
-    // For now, using orders as transactions or return empty list if not modeled separately
-    const orders = await Order.find({}).sort({ createdAt: -1 });
+    
+    let query = {};
+    if (session.user.role !== 'admin') {
+      query = { user: session.user.id };
+    }
+
+    const orders = await Order.find(query).sort({ createdAt: -1 });
     
     const transactions = orders.map(o => ({
       id: "TX-" + o.transaction_id.toUpperCase(),

@@ -33,12 +33,12 @@ async function getData() {
 export default async function DashboardHome() {
   const { wallet, transactions, orders } = await getData();
   const stats = [
-    { label: "Total orders", value: 312, change: "+12% vs last week" },
-    { label: "Data purchased", value: "1.2 TB", change: "+8% vs last week" },
+    { label: "Total orders", value: orders.length, change: "All time" },
+    { label: "Pending orders", value: orders.filter((o:any) => o.status !== "Delivered").length, change: "Awaiting fulfillment" },
     {
       label: "Wallet balance",
       value: `₵${wallet.balance.toFixed(2)}`,
-      change: "Ready to spend",
+      change: "Available to spend",
     },
   ];
 

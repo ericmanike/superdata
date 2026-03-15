@@ -13,7 +13,13 @@ export async function GET() {
     }
 
     await dbConnect();
-    const rawOrders = await Order.find({}).sort({ createdAt: -1 });
+    
+    let query = {};
+    if (session.user.role !== 'admin') {
+      query = { user: session.user.id };
+    }
+    
+    const rawOrders = await Order.find(query).sort({ createdAt: -1 });
     
     const orders = rawOrders.map(o => ({
       id: o._id.toString(),

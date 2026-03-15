@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Lock, Loader2, CheckCircle } from "lucide-react";
+import { Lock, Loader2, CheckCircle, ArrowLeft } from "lucide-react";
 
 function ResetPasswordForm() {
     const router = useRouter();
@@ -79,10 +79,16 @@ function ResetPasswordForm() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4 text-black">
             <div className="w-full max-w-md">
-                <div className="bg-white rounded-2xl shadow-lg border border-zinc-200 p-8">
-                    <div className="mb-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-zinc-200 p-8 relative">
+                     <Link
+                        href="/auth/login"
+                        className="absolute left-6 top-6 p-2 rounded-full hover:bg-slate-100 transition-colors group"
+                    >
+                        <ArrowLeft className="h-5 w-5 text-slate-500 group-hover:text-slate-700" />
+                    </Link>
+                    <div className="mb-8 text-center">
                         <h1 className="text-2xl font-bold text-zinc-900 mb-2">Reset Password</h1>
                         <p className="text-zinc-600 text-sm">
                             Enter your new password below.

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import {  Loader2, Eye, EyeOff } from "lucide-react";
+import {  Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -40,7 +41,36 @@ export default function RegisterPage() {
                 throw new Error(data.message || "Something went wrong");
             }
 
-            router.push("/auth/login?registered=true");
+            
+
+
+
+   const email = formData?.email
+    const password = formData?.password
+    if(!email || !password){
+        alert('something went wrong missing email and paddword')
+        return
+    }
+
+
+
+   const Loginres =  await signIn("credentials",{
+          email,
+          password,
+          redirect:false,
+             }
+             )
+            if (Loginres?.error) {
+                setError(Loginres.error);
+            } else {
+                router.push("/dashboard");
+                router.refresh();
+            }
+
+         console.log(Loginres)
+
+
+
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -50,7 +80,13 @@ export default function RegisterPage() {
 
     return (
         <div className="flex items-center justify-center h-screen overflow-y-auto  px-4" >
-            <Card className="w-full max-w-md border-2 border-slate-400 bg-white ">
+            <Card className="w-full max-w-md border-2 border-slate-400 bg-white relative">
+                <Link
+                    href="/"
+                    className="absolute left-6 top-6 p-2 rounded-full hover:bg-slate-100 transition-colors group"
+                >
+                    <ArrowLeft className="h-5 w-5 text-slate-500 group-hover:text-slate-700" />
+                </Link>
                 <CardHeader className="text-center">
                   
                     <CardTitle className="text-2xl text-slate-900">Create Account</CardTitle>

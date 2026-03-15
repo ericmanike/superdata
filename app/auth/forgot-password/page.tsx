@@ -41,18 +41,17 @@ export default function ForgotPasswordPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4 text-black">
             <div className="w-full max-w-md">
-                <div className="bg-white rounded-2xl shadow-lg border border-zinc-200 p-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-zinc-200 p-8 relative">
                     <Link
                         href="/auth/login"
-                        className="inline-flex items-center gap-2 text-sm text-zinc-600 hover:text-zinc-900 mb-6 transition-colors"
+                        className="absolute left-6 top-6 p-2 rounded-full hover:bg-slate-100 transition-colors group"
                     >
-                        <ArrowLeft size={16} />
-                        Back to Login
+                        <ArrowLeft className="h-5 w-5 text-slate-500 group-hover:text-slate-700" />
                     </Link>
 
-                    <div className="mb-8">
+                    <div className="mb-8 text-center">
                         <h1 className="text-2xl font-bold text-zinc-900 mb-2">Forgot Password?</h1>
                         <p className="text-zinc-600 text-sm">
                             Enter your email address and we'll send you a link to reset your password.

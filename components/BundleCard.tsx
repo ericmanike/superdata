@@ -8,6 +8,8 @@ const networkColors: Record<string, string> = {
   AirtelTigo: "bg-sky-500",
 };
 
+import { Check } from "lucide-react";
+
 export function BundleCard({
   bundle,
   onSelect,
@@ -16,10 +18,12 @@ export function BundleCard({
   onSelect: (bundle: Bundle) => void;
 }) {
   return (
-    <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="flex flex-col justify-between rounded-[10px] border border-slate-200 bg-white p-6 min-h-[220px] shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
         <span
-          className={`rounded-full px-3 py-1 text-xs font-bold text-slate-900 ${
+          className={`rounded-full px-3 py-1 text-xs font-bold ${
+            bundle.network === "MTN" ? "text-slate-900" : "text-white"
+          } ${
             networkColors[bundle.network] ?? "bg-slate-900"
           }`}
         >
@@ -27,7 +31,13 @@ export function BundleCard({
         </span>
         <span className="text-sm font-semibold text-[#1e3a8a]">₵{bundle.price}</span>
       </div>
-      <div className="mt-3 text-2xl font-bold text-slate-900">{bundle.size}</div>
+      <div className="mt-3">
+        <div className="text-2xl font-bold text-slate-900">{bundle.size}</div>
+        <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md mt-1">
+          <Check size={10} strokeWidth={3} />
+          <span>None expire</span>
+        </div>
+      </div>
       <button
         type="button"
         onClick={() => onSelect(bundle)}
