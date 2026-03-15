@@ -94,8 +94,10 @@ export default function DashboardLayout({
               S
             </span>
             <div>
-              <div className="text-lg font-semibold leading-tight text-white">Superdata</div>
-              <div className="text-xs text-slate-100">Agent dashboard</div>
+              <div className="text-lg font-semibold leading-tight text-white">Dashboard</div>
+              <div className="text-xs text-slate-100 uppercase tracking-wider font-medium">
+                {session?.user?.role || "User"}
+              </div>
             </div>
           </div>
             <button

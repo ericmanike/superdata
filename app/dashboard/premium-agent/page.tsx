@@ -1,4 +1,11 @@
+"use client"
+import BecomeAgent from "@/components/ui/becomeAgent";
+import { useSession } from "next-auth/react";
+
 export default function PremiumAgentPage() {
+  const { data: session } = useSession()
+  const isAgent = session?.user?.role === 'agent'
+
   return (
     <div className="space-y-6 text-slate-900">
       <div>
@@ -16,18 +23,20 @@ export default function PremiumAgentPage() {
             <li>• Dedicated account manager</li>
             <li>• White-label storefront for your customers</li>
           </ul>
-          <button className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#FFD700] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:opacity-90">
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M5.5 9.5 8 5l4 5 4-5 2.5 4.5 2.5-1.5-2 9H5l-2-9 2.5 1.5Z" />
-              <path d="M5 18h14v1H5z" />
-            </svg>
+          <BecomeAgent className={`mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${isAgent ? 'bg-gray-400 text-white' : 'bg-[#FFD700] text-slate-900 hover:opacity-90'}`}>
+            {!isAgent && (
+                <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="currentColor"
+                    aria-hidden="true"
+                >
+                    <path d="M5.5 9.5 8 5l4 5 4-5 2.5 4.5 2.5-1.5-2 9H5l-2-9 2.5 1.5Z" />
+                    <path d="M5 18h14v1H5z" />
+                </svg>
+            )}
             Upgrade now
-          </button>
+          </BecomeAgent>
         </div>
     </div>
   );

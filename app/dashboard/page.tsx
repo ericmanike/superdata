@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,7 @@ async function getData() {
 }
 
 export default async function DashboardHome() {
+  const session = await getServerSession(authOptions);
   const { wallet, transactions, orders } = await getData();
   const stats = [
     { label: "Total orders", value: orders.length, change: "All time" },
@@ -46,8 +49,8 @@ export default async function DashboardHome() {
     <div className="space-y-8 text-slate-900">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm text-slate-600">Overview</p>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-600 uppercase tracking-widest font-bold">{session?.user?.role || "User"}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link

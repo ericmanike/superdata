@@ -49,8 +49,16 @@ export default function ProfilePage() {
             <label className="text-sm font-semibold text-slate-900">Email</label>
             <input
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-2 ring-transparent focus:ring-cyan-400/50"
+              readOnly
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none cursor-not-allowed"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-900">Account Role</label>
+            <input
+              value={session?.user?.role || "User"}
+              readOnly
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 font-bold uppercase tracking-wider outline-none cursor-not-allowed"
             />
           </div>
 
