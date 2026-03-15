@@ -1,56 +1,87 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import dbConnect from "@/lib/mongoose";
+import User from "@/lib/models/User";
+import Order from "@/lib/models/Order";
 
 export const dynamic = "force-dynamic";
 
-async function getData() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
-  async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
-    try {
-      const res = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
-      if (!res.ok) return fallback;
-      return (await res.json()) as T;
-    } catch {
-      return fallback;
-    }
+async function getData(userId: string, role: string) {
+  await dbConnect();
+  const user = await User.findById(userId);
+  
+  let query = {};
+  let adminBalance = 0;
+  
+  if (role === 'admin') {
+    // For admins, get total stats and all orders
+    query = {};
+    const allUsers = await User.find({}, 'walletBalance');
+    adminBalance = allUsers.reduce((sum, u) => sum + (u.walletBalance || 0), 0);
+  } else {
+    query = { user: userId };
   }
 
-  const [wallet, transactions, orders] = await Promise.all([
-    safeFetchJson("/api/wallet", {
-      balance: 0,
-      currency: "GHS",
-      lastUpdated: new Date().toISOString(),
-    }),
-    safeFetchJson("/api/transactions", [] as any[]),
-    safeFetchJson("/api/orders", [] as any[]),
-  ]);
+  const userOrders = await Order.find(query).sort({ createdAt: -1 });
 
-  return { wallet, transactions, orders };
+  const transactions = userOrders.map(o => ({
+    id: "TX-" + o.transaction_id.toUpperCase(),
+    network: o.network,
+    phone: o.phoneNumber,
+    bundle: o.bundleName,
+    amount: o.price,
+    status: o.status === 'delivered' ? 'Success' : o.status === 'failed' ? 'Failed' : 'Pending',
+    date: o.createdAt.toISOString()
+  }));
+
+  const orders = userOrders.map(o => ({
+    id: o._id.toString(),
+    network: o.network,
+    phone: o.phoneNumber,
+    bundle: o.bundleName,
+    status: o.status === 'delivered' ? 'Delivered' : o.status === 'failed' ? 'Failed' : 'Processing',
+  }));
+
+  return { 
+    user,
+    wallet: { balance: user?.walletBalance || 0 },
+    adminBalance,
+    transactions: transactions.slice(0, 5),
+    orders: orders.slice(0, 5)
+  };
 }
 
 export default async function DashboardHome() {
   const session = await getServerSession(authOptions);
-  const { wallet, transactions, orders } = await getData();
+  if (!session?.user?.id) return null;
+
+  const { user, wallet, adminBalance, transactions, orders } = await getData(session.user.id, session.user.role);
+  
   const stats = [
     { label: "Total orders", value: orders.length, change: "All time" },
     { label: "Pending orders", value: orders.filter((o:any) => o.status !== "Delivered").length, change: "Awaiting fulfillment" },
     {
-      label: "Wallet balance",
+      label: "My balance",
       value: `₵${wallet.balance.toFixed(2)}`,
       change: "Available to spend",
     },
   ];
+
+  if (session.user.role === 'admin') {
+    stats.push({
+      label: "Admin balance",
+      value: `₵${adminBalance.toFixed(2)}`,
+      change: "Total system funds",
+    });
+  }
 
   return (
     <div className="space-y-8 text-slate-900">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-600 uppercase tracking-widest font-bold">{session?.user?.role || "User"}</p>
+          <p className="text-sm text-slate-600 uppercase tracking-widest font-bold">{user?.role || "User"}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
@@ -68,7 +99,7 @@ export default async function DashboardHome() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className={`grid gap-4 sm:grid-cols-2 ${session.user.role === 'admin' ? 'xl:grid-cols-4' : 'xl:grid-cols-3'}`}>
         {stats.map((stat:any ) => (
           <div
             key={stat.label}

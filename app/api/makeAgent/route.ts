@@ -24,14 +24,17 @@ export async function POST(req: NextRequest) {
         const user = await User.findById(userId);
 
         if (!user) {
+            console.log("User not found");
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
 
         if (user.role === 'admin') {
+            console.log("Cannot modify admin role");
             return NextResponse.json({ message: "Cannot modify admin role" }, { status: 400 });
         }
 
         if (user.role === 'agent') {
+            console.log("User is already an agent");
             return NextResponse.json({ message: "User is already an agent" }, { status: 400 });
         }
 

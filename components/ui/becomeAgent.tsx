@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { DollarSign, User } from 'lucide-react'
+
 import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 import { formatCurrency } from '@/lib/utils'
@@ -93,6 +93,7 @@ function BecomeAgent({ className, children }: BecomeAgentProps) {
 
                             if (verifyResponse.ok) {
                                 await update({ role: 'agent' })
+                                console.log("User successfully registered as agent");
                                 window.location.reload()
                             }
                         } catch (err) {
@@ -127,4 +128,4 @@ function BecomeAgent({ className, children }: BecomeAgentProps) {
     )
 }
 
-export default BecomeAgent
+export default BecomeAgent

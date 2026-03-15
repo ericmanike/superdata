@@ -82,6 +82,7 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
                 body: JSON.stringify({
                   email: session?.user?.email!,
                   amount: amountNum,
+                  reference,
                 }),
               });
 

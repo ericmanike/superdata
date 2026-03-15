@@ -1,37 +1,48 @@
 import Link from "next/link";
 import TopUpWallet from "@/components/ui/topUpwallet";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import dbConnect from "@/lib/mongoose";
+import User from "@/lib/models/User";
+import Order from "@/lib/models/Order";
 
 export const dynamic = "force-dynamic";
 
-async function getData() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-
-  async function safeFetchJson<T>(path: string, fallback: T): Promise<T> {
-    try {
-      const res = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
-      if (!res.ok) return fallback;
-      return (await res.json()) as T;
-    } catch {
-      return fallback;
-    }
+async function getData(userId: string, role: string) {
+  await dbConnect();
+  const user = await User.findById(userId);
+  
+  let query = {};
+  if (role !== 'admin') {
+    query = { user: userId };
   }
 
-  const [wallet, transactions] = await Promise.all([
-    safeFetchJson("/api/wallet", {
-      balance: 0,
-      currency: "GHS",
-      lastUpdated: new Date().toISOString(),
-    }),
-    safeFetchJson("/api/transactions", [] as any[]),
-  ]);
+  const userOrders = await Order.find(query).sort({ createdAt: -1 });
 
-  return { wallet, transactions };
+  const transactions = userOrders.map(o => ({
+    id: o._id.toString(),
+    network: o.network,
+    phone: o.phoneNumber,
+    bundle: o.bundleName,
+    amount: o.price,
+    status: o.status === 'delivered' ? 'Success' : o.status === 'failed' ? 'Failed' : 'Pending',
+    date: o.createdAt.toISOString()
+  }));
+
+  return { 
+    wallet: { 
+      balance: user?.walletBalance || 0,
+      lastUpdated: user?.updatedAt || new Date().toISOString()
+    }, 
+    transactions: transactions.slice(0, 10) 
+  };
 }
 
 export default async function WalletPage() {
-  const { wallet, transactions } = await getData();
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return null;
+
+  const { wallet, transactions } = await getData(session.user.id, session.user.role);
   return (
     <div className="space-y-6 text-slate-900">
       <div className="flex items-center justify-between">

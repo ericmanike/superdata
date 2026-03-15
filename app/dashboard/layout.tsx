@@ -94,7 +94,7 @@ export default function DashboardLayout({
               S
             </span>
             <div>
-              <div className="text-lg font-semibold leading-tight text-white">Dashboard</div>
+              <div className="text-lg font-semibold leading-tight text-white">Superdata</div>
               <div className="text-xs text-slate-100 uppercase tracking-wider font-medium">
                 {session?.user?.role || "User"}
               </div>
@@ -156,8 +156,13 @@ export default function DashboardLayout({
               Dashboard
             </button>
              <div>
-               <p className="text-xs text-slate-500">Welcome</p>
-               <p className="text-sm font-semibold text-slate-900">{session?.user?.name || "User"}</p>
+               <p className="text-xs text-slate-500">Welcome back</p>
+               <div className="flex items-center gap-2">
+                 <p className="text-sm font-semibold text-slate-900">{session?.user?.name || "User"}</p>
+                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                   {session?.user?.role || "User"}
+                 </span>
+               </div>
              </div>
           </div>
 
