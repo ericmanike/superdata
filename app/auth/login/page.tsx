@@ -42,7 +42,7 @@ export default function LoginPage() {
 
     return (
         <div className="flex items-center justify-center h-screen overflow-y-auto  px-4">
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-md border-2 border-slate-400 bg-white">
                 <CardHeader className="text-center">
 
                     <CardTitle className="text-2xl text-slate-950 font-bold">Welcome Back</CardTitle>
@@ -102,7 +102,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full  cursor-pointer py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full  cursor-pointer py-2.5 bg-[#1e3a8a] hover:bg-[#1e3a8a]/80 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? <Loader2 className="animate-spin" size={20} /> : "Sign In"}
                         </button>

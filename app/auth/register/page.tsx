@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { UserPlus, Loader2, Eye, EyeOff } from "lucide-react";
+import {  Loader2, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -50,13 +50,11 @@ export default function RegisterPage() {
 
     return (
         <div className="flex items-center justify-center h-screen overflow-y-auto  px-4" >
-            <Card className="w-full max-w-md ">
+            <Card className="w-full max-w-md border-2 border-slate-400 bg-white ">
                 <CardHeader className="text-center">
-                    <div className="mx-auto w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4 text-blue-600">
-                        <UserPlus size={24} />
-                    </div>
+                  
                     <CardTitle className="text-2xl text-slate-900">Create Account</CardTitle>
-                    <p className="text-slate-500 text-sm mt-2">Join us to start trading</p>
+                    <p className="text-slate-500 text-sm mt-2">Join us  to stay connected</p>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -75,7 +73,7 @@ export default function RegisterPage() {
                                 value={formData.name}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 text-black rounded-lg border border-slate-300 bg-white/10 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white transition-all"
-                                placeholder="John Doe"
+                                placeholder="Your Name"
                             />
                         </div>
 
@@ -88,9 +86,9 @@ export default function RegisterPage() {
                                 value={formData.email}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 text-black rounded-lg border border-slate-300 bg-white/10 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-white transition-all"
-                                placeholder="john@example.com"
+                                placeholder="your email@example.com"
                             />
-                        </div>
+                        </div> 
 
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-900">Phone Number</label>
@@ -133,7 +131,7 @@ export default function RegisterPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full py-2.5 bg-[#1e3a8a] hover:bg-[#1e3a8a]/80 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {loading ? <Loader2 className="animate-spin" size={20} /> : "Create Account"}
                         </button>

@@ -62,11 +62,9 @@ export default function Home() {
             <a href="#home" className="text-white/90 hover:text-white transition">
               Home
             </a>
-            <a href="#features" className="text-white/90 hover:text-white transition">
-              Features
-            </a>
+          
             <a href="#pricing" className="text-white/90 hover:text-white transition">
-              Pricing
+              See Pricing
             </a>
             <Link href="/dashboard" className="text-white/90 hover:text-white transition">
               Dashboard
@@ -76,14 +74,14 @@ export default function Home() {
           {/* Desktop CTA buttons */}
           <div className="hidden items-center gap-3 md:flex">
             <Link
-              href="/dashboard"
-              className="rounded-full px-4 py-2 text-sm font-semibold text-white/90 ring-1 ring-white/40 transition hover:text-white"
+              href="/auth/login"
+              className="rounded-2xl px-4 py-2 text-sm font-semibold text-white/90 ring-1 ring-white/40 transition hover:text-white"
             >
               Login
             </Link>
             <Link
               href="/dashboard"
-              className="rounded-full bg-gradient-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:translate-y-0.5"
+              className="rounded-2xl bg-gradient-to-r from-cyan-400 to-violet-500 px-5 py-2 text-sm font-semibold text-slate-900 transition hover:translate-y-0.5"
             >
               Get Started
             </Link>
