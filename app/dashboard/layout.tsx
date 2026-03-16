@@ -37,7 +37,7 @@ const navItems: NavItem[] = [
   { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
   { label: "Premium Agent", href: "/dashboard/premium-agent", icon: Sparkles },
   { label: "Profile", href: "/dashboard/profile", icon: User },
-  { label: "My Agent Store", href: "/dashboard/my-agent-store", icon: Store },
+ /* { label: "My Agent Store", href: "/dashboard/my-agent-store", icon: Store },*/
   { label: "Admin", href: "/dashboard/admin", icon: ShieldCheck },
   { label: "Support", href: "/dashboard/support", icon: Headset },
 ];
