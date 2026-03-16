@@ -106,6 +106,12 @@ export default function AdminPage() {
         body: JSON.stringify(bundleForm),
       });
       await refreshAll();
+      setBundleForm({
+        network: "MTN",
+        size: "",
+        price: 0,
+        audience: "user"
+      });
       setStatus({ kind: "success", message: "Bundle created" });
     } catch (err: any) {
       setStatus({ kind: "error", message: err?.message });
@@ -227,6 +233,18 @@ const balance = async () => {
                 onChange={(e) => setBundleForm((f) => ({ ...f, size: e.target.value }))}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
                 placeholder="e.g. 5 GB"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-600">Price (GHS)</label>
+              <input
+                type="number"
+                step="0.01"
+                value={bundleForm.price}
+                onChange={(e) => setBundleForm((f) => ({ ...f, price: parseFloat(e.target.value) }))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                placeholder="8.30"
                 required
               />
             </div>

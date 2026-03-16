@@ -15,9 +15,9 @@ export function Navbar() {
         {/* Logo */}
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-xl font-black text-slate-900">
-            S
+            H
           </span>
-          <div className="text-lg font-semibold tracking-tight">Superdata</div>
+          <div className="text-lg font-semibold tracking-tight">hubsitedata</div>
         </div>
 
         {/* Desktop nav */}

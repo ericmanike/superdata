@@ -33,7 +33,6 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
   { label: "Buy Data", href: "/dashboard/buy-data", icon: Zap },
   { label: "Wallet", href: "/dashboard/wallet", icon: Wallet },
-  { label: "Transactions", href: "/dashboard/transactions", icon: ChartColumnDecreasing },
   { label: "My Orders", href: "/dashboard/orders", icon: ShoppingBag },
   { label: "Premium Agent", href: "/dashboard/premium-agent", icon: Sparkles },
   { label: "Profile", href: "/dashboard/profile", icon: User },
@@ -91,10 +90,10 @@ export default function DashboardLayout({
         <div className="flex items-center justify-between px-2">
           <Link href="/" className="flex items-center gap-3">
             <span className="grid h-10 w-10 place-items-center rounded-2xl bg-white text-xl font-black text-slate-900">
-              S
+              H
             </span>
             <div>
-              <div className="text-lg font-semibold leading-tight text-white">Superdata</div>
+              <div className="text-lg font-semibold leading-tight text-white">hubsitedata</div>
               <div className="text-xs text-slate-100 uppercase tracking-wider font-medium">
                 {session?.user?.role || "User"}
               </div>

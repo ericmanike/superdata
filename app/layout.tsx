@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Superdata | Buy Data Bundles Instantly",
+  title: "hubsitedata | Buy Data Bundles Instantly",
   description: "Affordable mobile data bundles with instant delivery and wallet payments.",
 };
 

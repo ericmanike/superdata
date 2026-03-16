@@ -80,11 +80,11 @@ export async function POST(req: Request) {
     }
 
     let networkId;
-    if (network === "MTN") {
+    if (network.toUpperCase() === "MTN") {
       networkId = 3;
-    } else if (network === "TELECEL") {
+    } else if (network.toUpperCase() === "TELECEL") {
       networkId = 2;
-    } else if (network.startsWith("AT")) {
+    } else if (network.toUpperCase().startsWith("AT")) {
       networkId = 4;
     } else {
       return NextResponse.json({ message: "Invalid network" }, { status: 400 });
@@ -162,26 +162,26 @@ export async function POST(req: Request) {
 
     const raw = await placeOrder.text();
     const Orderres = JSON.parse(raw);
-    console.log('Raw response:', raw);
-    console.log(Orderres);
+    console.log('Purchase order response:', Orderres);
 
     if (!placeOrder.ok) {
-
-      return NextResponse.json({ error: ' could not place an order' }, { status: 500 });
-
+      // mark as failed if explicitly rejected by API 
+      await Order.findByIdAndUpdate(order._id, { status: 'failed' });
+      return NextResponse.json({ message: Orderres.message || 'Could not place order' }, { status: 500 });
     }
 
+    const transaction_id = Orderres.transaction_code || Orderres.reference || ("SUCCESS_" + reference);
+    const updatedOrder = await Order.findByIdAndUpdate(
+      order._id, 
+      { 
+        transaction_id,
+        status: 'delivered' 
+      },
+      { new: true }
+    );
 
-
-    console.log(' purchase order response:', Orderres)
-
-    const transaction_id = Orderres.transaction_code
-     await Order.findByIdAndUpdate(order._id, { transaction_id });    
-
-   
-
-    console.log('📦 New order created:', order);
-    return NextResponse.json({ message: "Order created successfully", order }, { status: 201 });
+    console.log('📦 Order fulfilled and saved:', updatedOrder);
+    return NextResponse.json({ message: "Order processed successfully", order: updatedOrder }, { status: 201 });
   } catch (error) {
     console.error("Order creation error:", error);
     return NextResponse.json({ message: "Error creating order" }, { status: 500 });

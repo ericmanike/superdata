@@ -35,7 +35,7 @@ export default function Home() {
                 Buy Affordable Mobile Data Instantly
               </h1>
               <p className="mx-auto max-w-2xl text-lg text-slate-700">
-                Superdata connects to every major network so you can top-up in
+                hubsitedata connects to every major network so you can top-up in
                 seconds, keep wallets funded, and never run out of data again.
               </p>
             </div>
@@ -174,9 +174,9 @@ export default function Home() {
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-6 text-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <span className="grid h-9 w-9 place-items-center rounded-2xl bg-white text-base font-black text-slate-900">
-              S
+              H
             </span>
-            <span className="font-semibold text-white">Superdata</span>
+            <span className="font-semibold text-white">hubsitedata</span>
           </div>
           <div className="flex flex-wrap gap-4 text-white/80">
             <a href="#features" className="hover:text-white">
@@ -188,7 +188,7 @@ export default function Home() {
             <Link href="/dashboard" className="hover:text-white">
               Dashboard
             </Link>
-            <a href="mailto:help@superdata.africa" className="hover:text-white">
+            <a href="mailto:help@hubsitedata.africa" className="hover:text-white">
               Support
             </a>
           </div>

@@ -26,7 +26,7 @@ async function getData(userId: string, role: string) {
   const userOrders = await Order.find(query).sort({ createdAt: -1 });
 
   const transactions = userOrders.map(o => ({
-    id: "TX-" + o.transaction_id.toUpperCase(),
+    id: "TX-" + (o.transaction_id || "PENDING").toUpperCase(),
     network: o.network,
     phone: o.phoneNumber,
     bundle: o.bundleName,
@@ -39,7 +39,8 @@ async function getData(userId: string, role: string) {
     id: o._id.toString(),
     network: o.network,
     phone: o.phoneNumber,
-    bundle: o.bundleName,
+    bundle: o.bundleName.endsWith("GB") ? o.bundleName : `${o.bundleName} GB`,
+    amount: o.price,
     status: o.status === 'delivered' ? 'Delivered' : o.status === 'failed' ? 'Failed' : 'Processing',
   }));
 
@@ -121,84 +122,54 @@ export default async function DashboardHome() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Recent transactions
-            </h2>
-            <Link
-              href="/dashboard/transactions"
-              className="text-sm font-semibold text-[#1e3a8a]"
-            >
-              See all →
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {transactions.map((tx: any) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">
-                    {tx.network} • {tx.bundle}
-                  </p>
-                  <p className="text-xs text-slate-600">{tx.phone}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-semibold text-slate-900">
-                    ₵{tx.amount.toFixed(2)}
-                  </div>
-                  <div
-                    className={`text-xs font-semibold ${
-                      tx.status === "Success"
-                        ? "text-emerald-700"
-                        : "text-amber-700"
-                    }`}
-                  >
-                    {tx.status}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Recent activity
+          </h2>
+          <Link
+            href="/dashboard/orders"
+            className="text-sm font-semibold text-[#1e3a8a]"
+          >
+            Manage orders →
+          </Link>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Active orders</h2>
-            <Link
-              href="/dashboard/orders"
-              className="text-sm font-semibold text-[#1e3a8a]"
+        <div className="space-y-3">
+          {orders.map((order) => (
+            <div
+              key={order.id}
+              className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 transition hover:bg-slate-100"
             >
-              Track →
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {orders.slice(0, 3).map((order) => (
-              <div
-                key={order.id}
-                className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3"
-              >
+              <div className="flex items-center gap-4">
+                <div className={`grid h-10 w-10 place-items-center rounded-xl font-bold ${
+                  order.network === 'MTN' ? 'bg-amber-100 text-amber-700' : 
+                  order.network === 'Telecel' ? 'bg-rose-100 text-rose-700' : 
+                  'bg-sky-100 text-sky-700'
+                }`}>
+                  {order.network[0]}
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-bold text-slate-900">
                     {order.network} • {order.bundle}
                   </p>
-                  <p className="text-xs text-slate-600">{order.phone}</p>
+                  <p className="text-xs font-medium text-slate-500">{order.phone}</p>
                 </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    order.status === "Delivered"
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-amber-100 text-amber-800"
-                  }`}
-                >
-                  {order.status}
-                </span>
               </div>
-            ))}
-          </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-slate-900">₵{order.amount.toFixed(2)}</p>
+                <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                  order.status === 'Delivered' ? 'text-emerald-600' : 'text-amber-600'
+                }`}>
+                  {order.status}
+                </p>
+              </div>
+            </div>
+          ))}
+          {orders.length === 0 && (
+            <div className="py-10 text-center text-sm text-slate-500">
+              No recent activity.
+            </div>
+          )}
         </div>
       </div>
 

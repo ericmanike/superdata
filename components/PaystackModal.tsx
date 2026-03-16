@@ -28,6 +28,13 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
   if (!open || !summary) return null;
 
   const handlePayment = () => {
+    console.log("handlePayment triggered", { 
+      email: session?.user?.email, 
+      phone, 
+      summary, 
+      paystackPopExists: !!(window as any).PaystackPop 
+    });
+
     if (!session?.user?.email) {
       alert("Please login to purchase");
       return;
@@ -37,47 +44,64 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
       return;
     }
 
+    if (!(window as any).PaystackPop) {
+      alert("Payment system is still loading. Please try again in a few seconds.");
+      return;
+    }
+
     const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+    console.log("Paystack key status:", !!paystackKey);
+
     if (!paystackKey) {
       alert("Payment system error: Key missing");
       return;
     }
 
-    const handler = (window as any).PaystackPop.setup({
-      key: paystackKey,
-      email: session.user.email,
-      amount: Math.round((summary.price + summary.price * 0.02) * 100), // GHS to pesewas + 2% tax
-      currency: "GHS",
-      ref: "DATA_" + Date.now(),
-      callback: async (response: any) => {
-        try {
-          const res = await fetch("/api/orders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              network: summary.network,
-              bundleName: summary.size,
-              price: summary.price,
-              phoneNumber: phone,
-              reference: response.reference,
-            }),
-          });
-          if (res.ok) {
-            alert("Purchase successful!");
-            window.location.href = "/dashboard/orders";
-          } else {
-            const err = await res.json();
-            alert("Error: " + (err.message || "Failed to process order"));
-          }
-        } catch (e) {
-          alert("Network error processing order");
-        }
-      },
-      onClose: () => {
-        console.log("Window closed");
-      },
-    });
-    handler.openIframe();
+    try {
+      const handler = (window as any).PaystackPop.setup({
+        key: paystackKey,
+        email: session.user.email,
+        amount: Math.round((summary.price + summary.price * 0.02) * 100), // GHS to pesewas + 2% tax
+        currency: "GHS",
+        ref: "DATA_" + Date.now(),
+        callback: function (response: any) {
+          console.log("Paystack callback response:", response);
+          const processOrder = async () => {
+            try {
+              const res = await fetch("/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  network: summary.network,
+                  bundleName: summary.size.slice(0, -2),
+                  price: summary.price,
+                  phoneNumber: phone,
+                  reference: response.reference,
+                }),
+              });
+              if (res.ok) {
+                alert("Purchase successful!");
+                window.location.href = "/dashboard/orders";
+              } else {
+                const err = await res.json();
+                alert("Error: " + (err.message || "Failed to process order"));
+              }
+            } catch (e) {
+              console.error("Order completion error:", e);
+              alert("Network error processing order");
+            }
+          };
+          processOrder();
+        },
+        onClose: () => {
+          console.log("Paystack window closed");
+        },
+      });
+      handler.openIframe();
+    } catch (err) {
+      console.error("Paystack setup error:", err);
+      alert("Error initializing payment system");
+    }
   };
 
   return (
@@ -123,9 +147,7 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
         >
           Pay with Paystack
         </button>
-        <p className="mt-2 text-xs text-slate-500">
-          You will be redirected to Paystack to complete this payment securely.
-        </p>
+        
       </div>
     </div>
   );

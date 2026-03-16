@@ -17,7 +17,7 @@ export default function AgentStorePage() {
                 Store link
               </p>
               <p className="font-semibold text-slate-900">
-                https://superdata.africa/agent/datapro
+                https://hubsitedata.africa/agent/datapro
               </p>
             </div>
             <button className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900">
