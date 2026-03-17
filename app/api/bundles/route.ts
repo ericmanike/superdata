@@ -17,12 +17,11 @@ export async function GET() {
     await dbConnect();
     const bundles = await Bundle.find({});
     console.log(`Found ${bundles.length} bundles in database`);
-
+    
     const normalizedBundles = bundles.map((b: any) => ({
       id: (b._id || b.id)?.toString(),
       network: b.network || "MTN",
-      size: b.name || b.size || "Standard",
-      network_short: b.network_short || "",
+      size: b.name || b.size || "Standard", 
       price: b.price || 0,
       audience: b.audience || "user"
     }));
@@ -47,7 +46,6 @@ export async function POST(req: Request) {
     const bundleData = {
       ...body,
       name: body.size,
-      network_short: body.network_short || "",
     };
     const bundle = await Bundle.create(bundleData);
     return NextResponse.json(bundle, { status: 201 });
