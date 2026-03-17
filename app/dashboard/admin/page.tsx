@@ -51,7 +51,6 @@ export default function AdminPage() {
       id: b._id?.toString() || b.id || Math.random().toString(),
       network: b.network,
       size: b.name || b.size || "Unknown Size",
-      network_short: b.network_short || "",
       price: b.price || 0,
       audience: b.audience || "user"
     }));
@@ -68,7 +67,6 @@ export default function AdminPage() {
   const [bundleForm, setBundleForm] = useState({
     network: "MTN" as Network,
     size: "1 GB",
-    network_short: "",
     price: 5,
     audience: "user" as "user" | "agent"
   });
@@ -122,7 +120,6 @@ export default function AdminPage() {
       setBundleForm({
         network: "MTN",
         size: "",
-        network_short: "",
         price: 0,
         audience: "user"
       });
@@ -260,16 +257,6 @@ export default function AdminPage() {
                 onChange={(e) => setBundleForm((f) => ({ ...f, size: e.target.value }))}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
                 placeholder="e.g. 5 GB"
-                required
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-slate-600">Network Short (API Code)</label>
-              <input
-                value={bundleForm.network_short}
-                onChange={(e) => setBundleForm((f) => ({ ...f, network_short: e.target.value }))}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
-                placeholder="e.g. 1000"
                 required
               />
             </div>
@@ -445,9 +432,6 @@ export default function AdminPage() {
                   <td className="px-4 py-4">
                     <div className="flex flex-col">
                       <span className="font-bold text-slate-900">{b.size}</span>
-                      {b.network_short && (
-                        <span className="text-[10px] font-mono text-slate-400">Code: {b.network_short}</span>
-                      )}
                     </div>
                   </td>
                   <td className="px-4 py-4 text-right">
