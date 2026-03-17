@@ -13,7 +13,7 @@ export default function PremiumAgentPage() {
         <h1 className="text-2xl font-bold text-slate-900">Premium Agent</h1>
       </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 max-w-md">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 w-[80%]">
           <h2 className="text-lg font-semibold text-slate-900">
             Premium perks included
           </h2>
