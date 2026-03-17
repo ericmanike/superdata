@@ -2,11 +2,13 @@
 
 import { BundleCard } from "@/components/BundleCard";
 import { PaystackModal } from "@/components/PaystackModal";
+import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 
 type Network = "All" | "MTN" | "Telecel" | "AirtelTigo";
 
 export default function BuyDataPage() {
+  const { data: session } = useSession();
   const [bundles, setBundles] = useState<any[]>([]);
   const [phone, setPhone] = useState("");
   const [bundleId, setBundleId] = useState("");
@@ -32,10 +34,21 @@ export default function BuyDataPage() {
   }, []);
 
   const filteredBundles = useMemo(() => {
-    const list = Array.isArray(bundles) ? bundles : [];
+    let list = Array.isArray(bundles) ? bundles : [];
+    
+    // Filter by audience (role)
+    const role = session?.user?.role || 'user';
+    if (role === 'agent') {
+      list = list.filter(b => b.audience === 'agent');
+    } else if (role !== 'admin') {
+      // Regular users only see 'user' bundles
+      list = list.filter(b => b.audience === 'user' || !b.audience);
+    }
+    // Note: Admins see everything
+
     if (filter === "All") return list;
     return list.filter((b) => b.network === filter);
-  }, [filter, bundles]);
+  }, [filter, bundles, session]);
 
   const selectedBundle = Array.isArray(bundles) ? bundles.find((b) => b.id === bundleId) : null;
 
@@ -80,6 +93,11 @@ export default function BuyDataPage() {
               }}
             />
           ))}
+          {filteredBundles.length === 0 && (
+            <div className="col-span-full py-12 text-center">
+              <p className="text-slate-500 font-medium">No bundles found for this category.</p>
+            </div>
+          )}
         </div>
       </div>
 
