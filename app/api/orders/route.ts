@@ -29,7 +29,8 @@ export async function GET() {
       amount: o.price,
       status: o.status.charAt(0).toUpperCase() + o.status.slice(1), // Capitalize
       date: o.createdAt.toISOString(),
-      phone: o.phoneNumber
+      phone: o.phoneNumber,
+      transactionId: o.transaction_id
     }));
 
     return NextResponse.json(orders);

@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import CopyButton from "@/components/ui/CopyButton";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
 import Order from "@/lib/models/Order";
@@ -25,7 +26,8 @@ async function getData() {
     phone: o.phoneNumber,
     amount: o.price,
     status: o.status ,
-    date: o.createdAt.toISOString()
+    date: o.createdAt.toISOString(),
+    transactionId: o.transaction_id
   }));
 
   return { orders };
@@ -53,9 +55,14 @@ export default async function OrdersPage() {
                     {order.network} • {order.bundle}
                   </p>
                   <p className="text-sm font-medium text-slate-500">{order.phone}</p>
+                  <CopyButton
+                    text={order.transactionId}
+                    prefix="ORDER ID:"
+                    className="text-[10px] font-bold text-slate-400"
+                  />
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <p className="font-bold text-slate-900">₵{order.amount.toFixed(2)}</p>
+                  <p className="font-bold text-slate-900 text-lg">₵{order.amount.toFixed(2)}</p>
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
                       order.status === "delivered"

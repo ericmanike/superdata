@@ -16,7 +16,7 @@ export default function CopyButton({
 
     if (!text) return null;
 
-    const displayId = text.length > 8 ? `${text.substring(0, 4)}...${text.substring(text.length - 4)}` : text;
+    const displayId = text.length > 50 ? `${text.substring(0, 47)}...` : text;
 
     const handleCopy = (e: React.MouseEvent) => {
         e.preventDefault();

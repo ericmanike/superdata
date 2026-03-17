@@ -145,30 +145,32 @@ export default function DashboardLayout({
       </aside>
 
       <div className="flex flex-1 flex-col md:ml-72">
-        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-4">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:py-4">
+          <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
             <button
-              className="flex items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-900 md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 md:hidden"
               onClick={() => setOpen((s) => !s)}
             >
-              <Menu size={18} />
-              Dashboard
+              <Menu size={20} />
             </button>
-             <div>
-               <p className="text-xs text-slate-500">Welcome back</p>
-               <div className="flex items-center gap-2">
-                 <p className="text-sm font-semibold text-slate-900">{session?.user?.name || "User"}</p>
-                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                   {session?.user?.role || "User"}
-                 </span>
-               </div>
-             </div>
+            <div className="min-w-0">
+              <p className="text-[10px] md:text-xs font-medium text-slate-500 line-clamp-1">Welcome back,</p>
+              <div className="flex items-center gap-1.5 md:gap-2">
+                <p className="truncate text-sm font-bold text-slate-900 max-w-[120px] sm:max-w-none">
+                  {session?.user?.name || "User"}
+                </p>
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  {session?.user?.role || "User"}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <TopUpWallet className="inline-flex items-center gap-2 rounded-full bg-[#00caf5] px-4 py-2 text-sm font-semibold text-slate-900 cursor-pointer transition hover:opacity-90">
-              <Plus size={16} strokeWidth={2.5} />
-              Top up wallet
+          <div className="flex items-center gap-2 md:gap-3">
+            <TopUpWallet className="flex items-center gap-2 rounded-full bg-[#00caf5] px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-bold text-slate-900 transition hover:opacity-90 shadow-sm">
+              <Plus size={16} strokeWidth={3} />
+              <span className="hidden sm:inline">Top up wallet</span>
+              <span className="sm:hidden">Fund</span>
             </TopUpWallet>
           </div>
         </header>

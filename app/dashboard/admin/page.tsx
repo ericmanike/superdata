@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Copy } from "lucide-react";
 import { useSession } from "next-auth/react";
+import CopyButton from "@/components/ui/CopyButton";
 import type { Bundle, Network, Order, Transaction, User, Wallet } from "@/lib/mockData";
 
 const networkColors: Record<string, string> = {
@@ -446,6 +447,13 @@ export default function AdminPage() {
                   <p className="font-medium">{order.phone}</p>
                   <p>₵{order.amount}</p>
                   <p className="text-xs text-slate-400">{new Date(order.date).toLocaleString()}</p>
+                </div>
+                <div className="mt-1">
+                  <CopyButton
+                    text={order.transactionId}
+                    prefix="ID:"
+                    className="text-[10px] font-bold text-slate-400"
+                  />
                 </div>
               </div>
               <div className="flex items-center gap-2">

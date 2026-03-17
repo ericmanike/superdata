@@ -27,6 +27,7 @@ export interface Order {
   network: Network;
   bundle: string;
   amount: number;
+  transactionId?: string;
 }
 
 export type TransactionStatus = "Success" | "Pending" | "Failed";

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CopyButton from "@/components/ui/CopyButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
@@ -41,7 +42,8 @@ async function getData(userId: string, role: string) {
     phone: o.phoneNumber,
     bundle: o.bundleName.endsWith("GB") ? o.bundleName : `${o.bundleName} GB`,
     amount: o.price,
-    status: o.status
+    status: o.status,
+    transactionId: o.transaction_id
   }));
 
   return { 
@@ -152,7 +154,12 @@ export default async function DashboardHome() {
                   <p className="text-sm font-bold text-slate-900">
                     {order.network} • {order.bundle}
                   </p>
-                  <p className="text-xs font-medium text-slate-500">{order.phone}</p>
+                  <p className="text-xs font-medium text-slate-500 text-slate-600 font-bold">{order.phone}</p>
+                  <CopyButton
+                    text={order.transactionId}
+                    prefix="ID:"
+                    className="text-[9px] font-bold text-slate-400"
+                  />
                 </div>
               </div>
               <div className="text-right">
