@@ -175,7 +175,7 @@ export async function POST(req: Request) {
       order._id,
       {
         transaction_id,
-        status: 'delivered'
+        status: 'pending'
       },
       { new: true }
     );
