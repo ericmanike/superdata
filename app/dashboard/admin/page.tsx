@@ -42,21 +42,33 @@ export default function AdminPage() {
   const [wallets, setWallets] = useState<Wallet[]>([]);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [dakaziBalance, setDakaziBalance] = useState<any>(null);
+  const [inventoryFilter, setInventoryFilter] = useState<Network | "All">("All");
+  const [audienceFilter, setAudienceFilter] = useState<"All" | "user" | "agent">("All");
 
   const normalizedBundles = useMemo(() => {
     if (!Array.isArray(bundles)) return [];
-    return bundles.map((b: any) => ({
+    let list = bundles.map((b: any) => ({
       id: b._id?.toString() || b.id || Math.random().toString(),
       network: b.network,
       size: b.name || b.size || "Unknown Size",
+      network_short: b.network_short || "",
       price: b.price || 0,
       audience: b.audience || "user"
     }));
-  }, [bundles]);
+
+    if (inventoryFilter !== "All") {
+      list = list.filter(b => b.network === inventoryFilter);
+    }
+    if (audienceFilter !== "All") {
+      list = list.filter(b => b.audience === audienceFilter);
+    }
+    return list;
+  }, [bundles, inventoryFilter, audienceFilter]);
 
   const [bundleForm, setBundleForm] = useState({
     network: "MTN" as Network,
     size: "1 GB",
+    network_short: "",
     price: 5,
     audience: "user" as "user" | "agent"
   });
@@ -110,6 +122,7 @@ export default function AdminPage() {
       setBundleForm({
         network: "MTN",
         size: "",
+        network_short: "",
         price: 0,
         audience: "user"
       });
@@ -251,6 +264,16 @@ export default function AdminPage() {
               />
             </div>
             <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-600">Network Short (API Code)</label>
+              <input
+                value={bundleForm.network_short}
+                onChange={(e) => setBundleForm((f) => ({ ...f, network_short: e.target.value }))}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+                placeholder="e.g. 1000"
+                required
+              />
+            </div>
+            <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-600">Price (GHS)</label>
               <input
                 type="number"
@@ -343,7 +366,7 @@ export default function AdminPage() {
       </div>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <header className="mb-4 flex items-center justify-between">
+        <header className="mb-4 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-wide text-slate-500">Inventory</p>
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -353,58 +376,109 @@ export default function AdminPage() {
               </span>
             </h2>
           </div>
-          <button
-            onClick={refreshAll}
-            className="text-xs font-semibold text-[#1e3a8a] hover:underline"
-          >
-            Update list
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1 rounded-xl bg-slate-50 p-1 border border-slate-100">
+              {(["All", "user", "agent"] as const).map((aud) => (
+                <button
+                  key={aud}
+                  onClick={() => setAudienceFilter(aud)}
+                  className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
+                    audienceFilter === aud
+                      ? "bg-white text-purple-700 shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {aud === "All" ? "All Audience" : aud.charAt(0).toUpperCase() + aud.slice(1)}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 rounded-xl bg-slate-50 p-1 border border-slate-100">
+              {(["All", ...networks] as const).map((net) => (
+                <button
+                  key={net}
+                  onClick={() => setInventoryFilter(net)}
+                  className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
+                    inventoryFilter === net
+                      ? "bg-white text-[#1e3a8a] shadow-sm"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  {net}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={refreshAll}
+              className="rounded-xl bg-slate-100 p-2 text-slate-600 hover:bg-slate-200 transition-colors"
+              title="Update list"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            </button>
+          </div>
         </header>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {normalizedBundles.map((b: any) => (
-            <div
-              key={b.id}
-              className="flex flex-col justify-between rounded-[10px] border border-slate-200 bg-white p-6 min-h-[220px] shadow-sm transition-shadow hover:shadow-md"
-            >
-              <div className="flex items-center justify-between">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${b.network === "MTN" ? "text-slate-900" : "text-white"
-                    } ${networkColors[b.network] ?? "bg-slate-900"
-                    }`}
-                >
-                  {b.network}
-                </span>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-[#1e3a8a]">₵{b.price}</p>
-                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase ${b.audience === 'agent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <th className="px-4 py-3">Network</th>
+                <th className="px-4 py-3">Bundle Name</th>
+                <th className="px-4 py-3 text-right">Price (GHS)</th>
+                <th className="px-4 py-3">Audience</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {normalizedBundles.map((b: any) => (
+                <tr key={b.id} className="group hover:bg-slate-50 transition-colors">
+                  <td className="px-4 py-4">
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                        b.network === "MTN" ? "bg-amber-100 text-amber-800" : 
+                        b.network === "Telecel" ? "bg-rose-100 text-rose-700" : 
+                        "bg-sky-100 text-sky-700"
+                      }`}
+                    >
+                      {b.network}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-slate-900">{b.size}</span>
+                      {b.network_short && (
+                        <span className="text-[10px] font-mono text-slate-400">Code: {b.network_short}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <span className="font-semibold text-slate-700">₵{b.price.toFixed(2)}</span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase ${
+                      b.audience === 'agent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
                     }`}>
-                    {b.audience === 'agent' ? 'Agent' : 'User'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-3">
-                <div className="text-2xl font-bold text-slate-900">{b.size}</div>
-                <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md mt-1">
-                  <Check size={10} strokeWidth={3} />
-                  <span>None expire</span>
-                </div>
-              </div>
-
-              <button
-                onClick={() => deleteBundle(b.id)}
-                className="mt-4 w-full rounded-xl bg-white border border-rose-100 py-2 text-xs font-bold text-rose-600 transition hover:bg-rose-50 hover:border-rose-300"
-              >
-                Delete Package
-              </button>
-            </div>
-          ))}
-          {normalizedBundles.length === 0 && (
-            <p className="col-span-full py-8 text-center text-sm text-slate-500">
-              No bundles created yet.
-            </p>
-          )}
+                      {b.audience === 'agent' ? 'Agent' : 'User'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <button
+                      onClick={() => deleteBundle(b.id)}
+                      className="rounded-lg border border-rose-100 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 hover:border-rose-300"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {normalizedBundles.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-sm text-slate-500">
+                    No bundles found for this filter.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
 

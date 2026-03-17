@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IBundle extends Document {
     network: 'MTN' | 'Telecel' | 'AirtelTigo';
     name: string; // e.g. "1GB", "2.5GB"
+    network_short: string; // e.g. "1000", "2000" (the value sent to the API)
     sizeValue: number; // Value in MB for sorting/calc if needed, e.g. 1024
     price: number;
     isActive: boolean;
@@ -15,6 +16,7 @@ const BundleSchema = new Schema<IBundle>(
     {
         network: { type: String, enum: ['MTN', 'Telecel', 'AirtelTigo'], required: true },
         name: { type: String, required: true },
+        network_short: { type: String, default: "" },
         sizeValue: { type: Number, default: 0 },
         price: { type: Number, required: true },
         isActive: { type: Boolean, default: true },
