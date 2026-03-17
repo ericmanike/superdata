@@ -116,7 +116,7 @@ export async function POST(req: Request) {
     const tax = 0.02 * price
     let total = price + tax
     console.log('Total before rounding:', total)
-    total = Math.round(total * 100) / 100  
+    total = Math.round(total * 100) / 100
     console.log('Total after rounding:', total)
 
     console.log('Payment amount:', amount / 100)

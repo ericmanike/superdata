@@ -53,9 +53,9 @@ export default function AdminPage() {
     }));
   }, [bundles]);
 
-  const [bundleForm, setBundleForm] = useState({ 
-    network: "MTN" as Network, 
-    size: "1 GB", 
+  const [bundleForm, setBundleForm] = useState({
+    network: "MTN" as Network,
+    size: "1 GB",
     price: 5,
     audience: "user" as "user" | "agent"
   });
@@ -77,11 +77,11 @@ export default function AdminPage() {
         api<Transaction[]>("/api/transactions").catch(e => { console.error("TX API failed:", e); return []; }),
         api<Wallet[]>("/api/wallets").catch(e => { console.error("Wallets API failed:", e); return []; }),
       ]);
-      
-      console.log("Admin: Data received", { 
-        users: usersData.length, 
-        bundles: bundlesData.length, 
-        orders: ordersData.length 
+
+      console.log("Admin: Data received", {
+        users: usersData.length,
+        bundles: bundlesData.length,
+        orders: ordersData.length
       });
 
       setUsers(usersData);
@@ -161,15 +161,29 @@ export default function AdminPage() {
     }
   }
 
-const balance = async () => {
-  const response = await fetch(`/api/testingDakazi`,{
-    method: "GET",
-    next: { revalidate: 0 } // Ensure it's not cached too aggressively
-  })
-  const data = await response.json()
-  console.log("  Data from Dakazi API " , data)
-  setDakaziBalance(data)
-}
+  async function deleteOrder(orderId: string) {
+    if (!confirm("Are you sure you want to delete this order?")) return;
+    setStatus({ kind: "loading", message: "Deleting order..." });
+    try {
+      await api(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      await refreshAll();
+      setStatus({ kind: "success", message: "Order deleted successfully" });
+    } catch (err: any) {
+      setStatus({ kind: "error", message: err?.message });
+    }
+  }
+
+  const balance = async () => {
+    const response = await fetch(`/api/testingDakazi`, {
+      method: "GET",
+      next: { revalidate: 0 } // Ensure it's not cached too aggressively
+    })
+    const data = await response.json()
+    console.log("  Data from Dakazi API ", data)
+    setDakaziBalance(data)
+  }
 
 
 
@@ -182,13 +196,12 @@ const balance = async () => {
         </div>
         {status.kind !== "idle" && (
           <div
-            className={`rounded-full px-4 py-2 text-sm font-semibold ${
-              status.kind === "error"
+            className={`rounded-full px-4 py-2 text-sm font-semibold ${status.kind === "error"
                 ? "bg-rose-100 text-rose-700"
                 : status.kind === "success"
                   ? "bg-emerald-100 text-emerald-700"
                   : "bg-amber-100 text-amber-800"
-            }`}
+              }`}
           >
             {status.message}
           </div>
@@ -317,13 +330,13 @@ const balance = async () => {
             </button> */}
           </header>
           <div className="mt-8">
-             <div className="flex items-baseline gap-1">
-               <span className="text-2xl font-black text-blue-600">₵</span>
-               <span className="text-4xl font-black text-blue-900 tracking-tight">
-                 {dakaziBalance?.AccountBalance?.["Wallet Balance"] || "0.00"}
-               </span>
-             </div>
-            
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-blue-600">₵</span>
+              <span className="text-4xl font-black text-blue-900 tracking-tight">
+                {dakaziBalance?.AccountBalance?.["Wallet Balance"] || "0.00"}
+              </span>
+            </div>
+
           </div>
         </section>
       </div>
@@ -355,24 +368,21 @@ const balance = async () => {
             >
               <div className="flex items-center justify-between">
                 <span
-                  className={`rounded-full px-3 py-1 text-xs font-bold ${
-                    b.network === "MTN" ? "text-slate-900" : "text-white"
-                  } ${
-                    networkColors[b.network] ?? "bg-slate-900"
-                  }`}
+                  className={`rounded-full px-3 py-1 text-xs font-bold ${b.network === "MTN" ? "text-slate-900" : "text-white"
+                    } ${networkColors[b.network] ?? "bg-slate-900"
+                    }`}
                 >
                   {b.network}
                 </span>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-[#1e3a8a]">₵{b.price}</p>
-                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                    b.audience === 'agent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
+                  <span className={`mt-1 inline-block rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase ${b.audience === 'agent' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
                     {b.audience === 'agent' ? 'Agent' : 'User'}
                   </span>
                 </div>
               </div>
-              
+
               <div className="mt-3">
                 <div className="text-2xl font-bold text-slate-900">{b.size}</div>
                 <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider text-emerald-600 bg-emerald-50 w-fit px-2 py-0.5 rounded-md mt-1">
@@ -410,32 +420,41 @@ const balance = async () => {
             Reload
           </button>
         </div>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid gap-3 grid-cols-1">
           {orders.map((order) => (
             <div
               key={order.id}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-semibold">
-                  {order.network} • {order.bundle}
-                </span>
-                <span
-                  className={`text-xs font-semibold ${
-                    order.status === "Delivered"
-                      ? "text-emerald-700"
-                      : order.status === "Processing" || order.status === "Pending"
-                        ? "text-amber-700"
-                        : "text-rose-700"
-                  }`}
-                >
-                  {order.status}
-                </span>
+              <div className="flex-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-slate-900 text-base">
+                    {order.network} • {order.bundle}
+                  </span>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${order.status.toLowerCase() === "delivered"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : order.status.toLowerCase() === "processing" || order.status.toLowerCase() === "pending"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-rose-100 text-rose-700"
+                      }`}
+                  >
+                    {order.status}
+                  </span>
+                </div>
+                <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-slate-600">
+                  <p className="font-medium">{order.phone}</p>
+                  <p>₵{order.amount}</p>
+                  <p className="text-xs text-slate-400">{new Date(order.date).toLocaleString()}</p>
+                </div>
               </div>
-              <p className="text-xs text-slate-600">{order.phone}</p>
-              <div className="mt-1 flex items-center justify-between text-xs text-slate-700">
-                <span>₵{order.amount}</span>
-                <span>{new Date(order.date).toLocaleString()}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => deleteOrder(order.id)}
+                  className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50"
+                >
+                  Delete Order
+                </button>
               </div>
             </div>
           ))}
@@ -486,13 +505,13 @@ const balance = async () => {
                 </div>
               </div>
               <div className="mt-4 flex gap-2">
-                <button 
+                <button
                   onClick={() => deleteUser(u.id)}
                   className="flex-1 rounded-lg bg-white border border-rose-200 py-1.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50"
                 >
                   Delete user
                 </button>
-                <button 
+                <button
                   onClick={() => promoteToAgent(u.id)}
                   className="flex-1 rounded-lg bg-[#1e3a8a] py-1.5 text-[11px] font-semibold text-white hover:bg-[#162b64]"
                 >

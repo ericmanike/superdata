@@ -58,8 +58,8 @@ export default async function WalletPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm text-slate-600">Wallet balance</p>
           <p className="mt-3 text-3xl font-black text-slate-900">
             ₵{wallet.balance.toFixed(2)}
@@ -74,30 +74,23 @@ export default async function WalletPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-semibold text-slate-900">Funding options</p>
           <ul className="mt-3 space-y-2 text-sm text-slate-700">
             <li>• Mobile money (MTN, Telecel, AirtelTigo)</li>
             <li>• Cards & bank transfers</li>
-            <li>• Agent float top-ups</li>
+            <li>• Manual top-up</li>
           </ul>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-semibold text-slate-900">Limits</p>
-          <div className="mt-3 space-y-2 text-sm text-slate-700">
-            <p>Daily spend: ₵3,500</p>
-            <p>Pending settlements: ₵420</p>
-            <p>Chargebacks: 0</p>
-          </div>
-        </div>
+
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">Payment history</h2>
           <Link
-            href="/dashboard/transactions"
+            href="/dashboard/orders"
             className="text-sm font-semibold text-[#1e3a8a]"
           >
             View all →

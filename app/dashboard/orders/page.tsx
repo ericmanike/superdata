@@ -24,7 +24,7 @@ async function getData() {
     bundle: o.bundleName.endsWith("GB") ? o.bundleName : `${o.bundleName} GB`,
     phone: o.phoneNumber,
     amount: o.price,
-    status: o.status === 'delivered' ? 'Delivered' : o.status === 'failed' ? 'Failed' : 'Processing',
+    status: o.status ,
     date: o.createdAt.toISOString()
   }));
 
@@ -58,7 +58,7 @@ export default async function OrdersPage() {
                   <p className="font-bold text-slate-900">₵{order.amount.toFixed(2)}</p>
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                      order.status === "Delivered"
+                      order.status === "delivered"
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-amber-100 text-amber-700"
                     }`}

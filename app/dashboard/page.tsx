@@ -41,7 +41,7 @@ async function getData(userId: string, role: string) {
     phone: o.phoneNumber,
     bundle: o.bundleName.endsWith("GB") ? o.bundleName : `${o.bundleName} GB`,
     amount: o.price,
-    status: o.status === 'delivered' ? 'Delivered' : o.status === 'failed' ? 'Failed' : 'Processing',
+    status: o.status
   }));
 
   return { 
@@ -158,7 +158,7 @@ export default async function DashboardHome() {
               <div className="text-right">
                 <p className="text-sm font-bold text-slate-900">₵{order.amount.toFixed(2)}</p>
                 <p className={`text-[10px] font-bold uppercase tracking-wider ${
-                  order.status === 'Delivered' ? 'text-emerald-600' : 'text-amber-600'
+                  order.status === 'delivered' ? 'text-emerald-600' : 'text-amber-600'
                 }`}>
                   {order.status}
                 </p>

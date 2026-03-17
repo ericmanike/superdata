@@ -35,7 +35,7 @@ export default function PremiumAgentPage() {
                     <path d="M5 18h14v1H5z" />
                 </svg>
             )}
-            Upgrade now
+            Upgrade now - ₵30
           </BecomeAgent>
         </div>
     </div>
