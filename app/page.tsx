@@ -71,15 +71,15 @@ export default function Home() {
             <ul className="space-y-5 text-lg font-bold text-slate-800">
               <li className="flex items-center gap-3">
                 <BadgeCheck className="h-6 w-6 text-[#1e3a8a] flex-shrink-0" />
+                <span>Better prices on data packages</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <BadgeCheck className="h-6 w-6 text-[#1e3a8a] flex-shrink-0" />
+                <span>Ability to create your own store</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <BadgeCheck className="h-6 w-6 text-[#1e3a8a] flex-shrink-0" />
                 <span>Real-time availability & instant confirmation</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <BadgeCheck className="h-6 w-6 text-[#1e3a8a] flex-shrink-0" />
-                <span>Volume pricing for agents and teams</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <BadgeCheck className="h-6 w-6 text-[#1e3a8a] flex-shrink-0" />
-                <span>Wallet-first checkout to minimize card fees</span>
               </li>
             </ul>
           </div>
