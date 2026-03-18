@@ -1,4 +1,5 @@
 "use client";
+import { Loader2 } from "lucide-react";
 
 type TopUpModalProps = {
   open: boolean;
@@ -6,9 +7,10 @@ type TopUpModalProps = {
   onAmountChange: (value: string) => void;
   onPay: () => void;
   onClose: () => void;
+  isLoading?: boolean;
 };
 
-export function TopUpModal({ open, amount, onAmountChange, onPay, onClose }: TopUpModalProps) {
+export function TopUpModal({ open, amount, onAmountChange, onPay, onClose, isLoading }: TopUpModalProps) {
   if (!open) return null;
 
   return (
@@ -38,8 +40,10 @@ export function TopUpModal({ open, amount, onAmountChange, onPay, onClose }: Top
 
         <button
           onClick={onPay}
-          className="mt-5 w-full rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white"
+          disabled={isLoading}
+          className="mt-5 w-full flex items-center justify-center rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white disabled:bg-slate-400"
         >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Pay with Paystack
         </button>
         <p className="mt-2 text-xs text-slate-500">

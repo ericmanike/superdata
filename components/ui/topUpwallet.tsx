@@ -23,6 +23,7 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
   const { data: session } = useSession()
   const [amount, setAmount] = useState<string>('')
   const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const loadPaystackScript = () => {
     if (window.PaystackPop) return;
@@ -48,6 +49,7 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
       return;
     }
 
+    setIsLoading(true);
     try {
       const reference = Date.now().toString()
       const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
@@ -55,12 +57,14 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
       if (!paystackKey) {
         console.error('Paystack public key not found')
         alert('Payment system configuration missing. Please contact support.')
+        setIsLoading(false);
         return;
       }
 
       if (!window.PaystackPop) {
         console.error('Paystack script not loaded');
         alert('Payment gateway is still loading. Please wait a moment.')
+        setIsLoading(false);
         return;
       }
 
@@ -72,6 +76,7 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
         ref: reference,
         onClose: () => {
           console.log('Payment closed');
+          setIsLoading(false);
         },
         callback: function (response: any) {
           (async () => {
@@ -92,19 +97,22 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
               } else {
                 console.error('Payment verification failed');
                 alert('Payment verification failed. Please contact support.');
+                setIsLoading(false);
               }
             } catch (err) {
               console.error('Error verifying payment', err);
+              setIsLoading(false);
             }
           })();
         },
       })
 
       handler.openIframe()
-      setIsOpen(false)
+      // Keep state true until one of the callbacks is fired
     } catch (error) {
       console.error(error);
       alert("Something went wrong with the payment process.");
+      setIsLoading(false);
     }
   }
 
@@ -116,6 +124,7 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
         onAmountChange={setAmount}
         onPay={handleTopUp}
         onClose={() => setIsOpen(false)}
+        isLoading={isLoading}
       />
       {children ? (
         <div onClick={() => setIsOpen(true)} className={className}>

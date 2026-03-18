@@ -1,8 +1,9 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 type ModalProps = {
   open: boolean;
   onClose: () => void;
@@ -13,6 +14,7 @@ type ModalProps = {
 
 export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: ModalProps) {
   const { data: session } = useSession();
+  const [isPaying, setIsPaying] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -57,6 +59,7 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
       return;
     }
 
+    setIsPaying(true);
     try {
       const handler = (window as any).PaystackPop.setup({
         key: paystackKey,
@@ -85,48 +88,57 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
               } else {
                 const err = await res.json();
                 toast.error("Error: " + (err.message || "Failed to process order"));
+                setIsPaying(false);
               }
             } catch (e) {
               console.error("Order completion error:", e);
               toast.error("Network error processing order");
+              setIsPaying(false);
             }
           };
           processOrder();
         },
         onClose: () => {
           console.log("Paystack window closed");
+          setIsPaying(false);
         },
       });
       handler.openIframe();
     } catch (err) {
       console.error("Paystack setup error:", err);
       toast.error("Error initializing payment system");
+      setIsPaying(false);
     }
   };
 
 const handleWalletPayment = async() => {
-  
-  const res = await fetch("/api/walletPurchase", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      network: summary.network,
-      bundleName: summary.size.slice(0, -2),
-      price: summary.price,
-      phoneNumber: phone,
-      reference: Date.now(),
-    }),
-  });
-  if (res.ok) {
-    toast.success("Purchase successful!");
-    window.location.href = "/dashboard/orders";
-  } else {
-    const err = await res.json();
-    toast.error("Error: " + (err.message || "Failed to process order"));
+  if (isPaying) return;
+  setIsPaying(true);
+  try {
+    const res = await fetch("/api/walletPurchase", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        network: summary.network,
+        bundleName: summary.size.slice(0, -2),
+        price: summary.price,
+        phoneNumber: phone,
+        reference: Date.now(),
+      }),
+    });
+    if (res.ok) {
+      toast.success("Purchase successful!");
+      window.location.href = "/dashboard/orders";
+    } else {
+      const err = await res.json();
+      toast.error("Error: " + (err.message || "Failed to process order"));
+      setIsPaying(false);
+    }
+  } catch (e) {
+    console.error("Wallet payment error:", e);
+    toast.error("Network error processing wallet payment");
+    setIsPaying(false);
   }
-
-
-
 }
 
 
@@ -177,13 +189,18 @@ const handleWalletPayment = async() => {
         <div className="w-full">
         <button 
           onClick={handlePayment}
-          className="mt-4 w-full max-w-md mx-auto rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white"
+          disabled={isPaying}
+          className="mt-4 w-full flex items-center justify-center max-w-md mx-auto rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white disabled:bg-slate-400 group"
         >
+          {isPaying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Pay with Paystack
         </button>
         <button 
-        onClick={handleWalletPayment}
-        className="mt-4 w-full max-w-md mx-auto rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white" >
+          onClick={handleWalletPayment}
+          disabled={isPaying}
+          className="mt-4 w-full flex items-center justify-center max-w-md mx-auto rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white disabled:bg-slate-400"
+        >
+          {isPaying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Pay with wallet
         </button>
         </div>
