@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { resend, RESEND_FROM_EMAIL } from "@/lib/resend";
 
 export async function POST(req: Request) {
     try {
@@ -15,7 +13,7 @@ export async function POST(req: Request) {
         const emailSubject = subject ? `${subject} - from ${name}` : `New Contact Form Submission from ${name}`;
 
         const { data, error } = await resend.emails.send({
-            from: `MegaGigs Contact <${process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev"}>`,
+            from: `MegaGigs Contact <${RESEND_FROM_EMAIL}>`,
             to: ["manikeeric@gmail.com"],
             subject: emailSubject,
            

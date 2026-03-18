@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-
+import { toast } from "react-toastify";
 type ModalProps = {
   open: boolean;
   onClose: () => void;
@@ -36,16 +36,16 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
     });
 
     if (!session?.user?.email) {
-      alert("Please login to purchase");
+      toast.error("Please login to purchase");
       return;
     }
     if (!phone) {
-      alert("Please enter a phone number");
+      toast.error("Please enter a phone number");
       return;
     }
 
     if (!(window as any).PaystackPop) {
-      alert("Payment system is still loading. Please try again in a few seconds.");
+      toast.info("Payment system is still loading. Please try again in a few seconds.");
       return;
     }
 
@@ -53,7 +53,7 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
     console.log("Paystack key status:", !!paystackKey);
 
     if (!paystackKey) {
-      alert("Payment system error: Key missing");
+      toast.error("Payment system error: Key missing");
       return;
     }
 
@@ -80,15 +80,15 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
                 }),
               });
               if (res.ok) {
-                alert("Purchase successful!");
+                toast.success("Purchase successful!");
                 window.location.href = "/dashboard/orders";
               } else {
                 const err = await res.json();
-                alert("Error: " + (err.message || "Failed to process order"));
+                toast.error("Error: " + (err.message || "Failed to process order"));
               }
             } catch (e) {
               console.error("Order completion error:", e);
-              alert("Network error processing order");
+              toast.error("Network error processing order");
             }
           };
           processOrder();
@@ -100,16 +100,50 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
       handler.openIframe();
     } catch (err) {
       console.error("Paystack setup error:", err);
-      alert("Error initializing payment system");
+      toast.error("Error initializing payment system");
     }
   };
 
+const handleWalletPayment = async() => {
+  
+  const res = await fetch("/api/walletPurchase", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      network: summary.network,
+      bundleName: summary.size.slice(0, -2),
+      price: summary.price,
+      phoneNumber: phone,
+      reference: Date.now(),
+    }),
+  });
+  if (res.ok) {
+    toast.success("Purchase successful!");
+    window.location.href = "/dashboard/orders";
+  } else {
+    const err = await res.json();
+    toast.error("Error: " + (err.message || "Failed to process order"));
+  }
+
+
+
+}
+
+
+
+
+
+
+
+
+
   return (
+
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-slate-500">Pay with Paystack</p>
+            <p className="text-sm text-slate-500">Select your payment method   </p>
             <h3 className="text-xl font-bold text-slate-900">Confirm purchase</h3>
           </div>
           <button className="text-slate-500 hover:text-slate-800" onClick={onClose}>
@@ -140,14 +174,19 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
             <span>₵{summary.price}</span>
           </div>
         </div>
-
+        <div className="w-full">
         <button 
           onClick={handlePayment}
-          className="mt-4 w-full rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white"
+          className="mt-4 w-full max-w-md mx-auto rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white"
         >
           Pay with Paystack
         </button>
-        
+        <button 
+        onClick={handleWalletPayment}
+        className="mt-4 w-full max-w-md mx-auto rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white" >
+          Pay with wallet
+        </button>
+        </div>
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
 import { formatCurrency } from '@/lib/utils'
 
-
+import { toast } from 'react-toastify'
 
 declare global {
     interface Window {
@@ -45,16 +45,16 @@ function BecomeAgent({ className, children }: BecomeAgentProps) {
 
     const handleTopUp = () => {
         if (!session) {
-            alert('Please login to continue')
+            toast.error('Please login to continue')
             return;
         }
         try {
             if (!session?.user?.email) {
-                alert('Please login to continue')
+                toast.error('Please login to continue')
                 return;
             }
             if (session?.user?.role === 'agent') {
-                alert('You are already an agent')
+                toast.info('You are already an agent')
                 return;
             }
 
@@ -106,7 +106,7 @@ function BecomeAgent({ className, children }: BecomeAgentProps) {
             handler.openIframe()
         } catch (error) {
             console.error(error);
-            alert("Something went wrong with the purchase.");
+            toast.error("Something went wrong with the purchase.");
         }
 
     }

@@ -18,10 +18,9 @@ export default function PremiumAgentPage() {
             Premium perks included
           </h2>
           <ul className="mt-4 space-y-2 text-sm text-slate-700">
-            <li>• Higher wallet limits and faster settlements</li>
-            <li>• Priority delivery pipeline during peak hours</li>
-            <li>• Dedicated account manager</li>
-            <li>• White-label storefront for your customers</li>
+            <li>• Better prices on data packages</li>
+            <li>• Ability to create your own store</li>
+            <li>• Higher profit margins</li>
           </ul>
           <BecomeAgent className={`mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition ${isAgent ? 'bg-gray-400 text-white' : 'bg-[#FFD700] text-slate-900 hover:opacity-90'}`}>
             {!isAgent && (

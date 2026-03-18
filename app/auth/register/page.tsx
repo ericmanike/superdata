@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import {  Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { signIn } from "next-auth/react";
 
+import { toast } from "react-toastify";
+
 export default function RegisterPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
@@ -43,14 +45,12 @@ export default function RegisterPage() {
 
             
 
-
-
-   const email = formData?.email
-    const password = formData?.password
-    if(!email || !password){
-        alert('something went wrong missing email and paddword')
-        return
-    }
+            const email = formData?.email;
+            const password = formData?.password;
+            if (!email || !password) {
+                toast.error("Something went wrong: missing email and password");
+                return;
+            }
 
 
 

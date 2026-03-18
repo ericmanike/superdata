@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
 import Bundle from "@/lib/models/Bundle";
-import { Console } from "console";
+
 
 export async function GET() {
   try {
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
       name: body.size,
     };
     const bundle = await Bundle.create(bundleData);
+    console.log("Created Bundle" , bundle)
     return NextResponse.json(bundle, { status: 201 });
   } catch (error) {
     console.error("Bundle creation error:", error);

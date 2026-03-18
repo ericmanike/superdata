@@ -186,6 +186,22 @@ export default function AdminPage() {
     }
   }
 
+  async function retryOrder(orderId: string) {
+    if (!confirm("Retry this order? This will re-attempt fulfillment with Dakazi.")) return;
+    setStatus({ kind: "loading", message: "Retrying order..." });
+    try {
+      await api(`/api/orders`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      await refreshAll();
+      setStatus({ kind: "success", message: "Order retry initiated" });
+    } catch (err: any) {
+      setStatus({ kind: "error", message: err?.message });
+    }
+  }
+
   const balance = async () => {
     const response = await fetch(`/api/testingDakazi`, {
       method: "GET",
@@ -287,7 +303,8 @@ export default function AdminPage() {
             </div>
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#1e3a8a] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#162b64]"
+              className="w-full rounded-xl bg-[#1e3a8a] 
+              px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#162b64]"
             >
               Add bundle
             </button>
@@ -515,6 +532,14 @@ export default function AdminPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {order.transactionId?.toLowerCase().startsWith('paid') && (
+                  <button
+                    onClick={() => retryOrder(order.id)}
+                    className="rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-xs font-bold text-amber-600 transition hover:bg-amber-50"
+                  >
+                    Retry Order
+                  </button>
+                )}
                 <button
                   onClick={() => deleteOrder(order.id)}
                   className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50"

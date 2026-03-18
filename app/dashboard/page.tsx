@@ -27,13 +27,12 @@ async function getData(userId: string, role: string) {
   const userOrders = await Order.find(query).sort({ createdAt: -1 });
 
   const transactions = userOrders.map(o => ({
-    id: "TX-" + (o.transaction_id || "PENDING").toUpperCase(),
+    id: (o.transaction_id || "PENDING").toUpperCase(),
     network: o.network,
     phone: o.phoneNumber,
     bundle: o.bundleName,
     amount: o.price,
-    status: o.status === 'delivered' ? 'Success' : o.status === 'failed' ? 'Failed' : 'Pending',
-    date: o.createdAt.toISOString()
+    status: o.status 
   }));
 
   const orders = userOrders.map(o => ({
@@ -63,7 +62,7 @@ export default async function DashboardHome() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
 
-  const { user, wallet, adminBalance, transactions, orders } = await getData(session.user.id, session.user.role);
+  const { user, wallet, adminBalance, orders } = await getData(session.user.id, session.user.role);
 
 
 

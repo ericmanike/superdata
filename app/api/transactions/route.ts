@@ -21,7 +21,7 @@ export async function GET() {
     const orders = await Order.find(query).sort({ createdAt: -1 });
     
     const transactions = orders.map(o => ({
-      id: "TX-" + o.transaction_id.toUpperCase(),
+      id: (o.transaction_id || "PENDING").toUpperCase(),
       userId: o.user?.toString() || "Guest",
       network: o.network,
       phone: o.phoneNumber,

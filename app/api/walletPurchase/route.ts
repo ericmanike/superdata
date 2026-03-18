@@ -27,7 +27,8 @@ export async function POST(req: Request) {
 
         await dbConnect();
 
-        const dbPrice = await Bundle.findOne({ name:bundleName+"GB", network:network,  audience: session.user.role, isActive:true }).select('price');   
+        const dbPrice = await Bundle.findOne({ name:bundleName+"GB", network:network,  audience: session.user.role}).select('price');   
+        console.log('Database price fetched:', dbPrice); 
        const realPrice = dbPrice ? dbPrice.price : null;
 
         if (realPrice === null) {
