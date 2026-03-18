@@ -44,6 +44,8 @@ export default function AdminPage() {
   const [dakaziBalance, setDakaziBalance] = useState<any>(null);
   const [inventoryFilter, setInventoryFilter] = useState<Network | "All">("All");
   const [audienceFilter, setAudienceFilter] = useState<"All" | "user" | "agent">("All");
+  const [topUpAmounts, setTopUpAmounts] = useState<Record<string, string>>({});
+
 
   const normalizedBundles = useMemo(() => {
     if (!Array.isArray(bundles)) return [];
@@ -159,6 +161,31 @@ export default function AdminPage() {
       setStatus({ kind: "error", message: err?.message });
     }
   }
+
+  async function handleTopUp(userId: string, amount: number) {
+    if (!amount || amount <= 0) {
+      alert("Please enter a valid amount");
+      return;
+    }
+    setStatus({ kind: "loading", message: "Topping up wallet..." });
+    try {
+      await api("/api/adminTopUp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, amount }),
+      });
+      setTopUpAmounts(prev => {
+        const next = { ...prev };
+        delete next[userId];
+        return next;
+      });
+      await refreshAll();
+      setStatus({ kind: "success", message: "Wallet topped up successfully" });
+    } catch (err: any) {
+      setStatus({ kind: "error", message: err?.message });
+    }
+  }
+
 
   async function deleteBundle(bundleId: string) {
     if (!confirm("Delete this bundle?")) return;
@@ -595,20 +622,38 @@ export default function AdminPage() {
                   {u.phone}
                 </div>
               </div>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => deleteUser(u.id)}
-                  className="flex-1 rounded-lg bg-white border border-rose-200 py-1.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50"
-                >
-                  Delete user
-                </button>
-                <button
-                  onClick={() => promoteToAgent(u.id)}
-                  className="flex-1 rounded-lg bg-[#1e3a8a] py-1.5 text-[11px] font-semibold text-white hover:bg-[#162b64]"
-                >
-                  Promote to agent
-                </button>
+              <div className="mt-4 space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={topUpAmounts[u.id] || ""}
+                    onChange={(e) => setTopUpAmounts(prev => ({ ...prev, [u.id]: e.target.value }))}
+                    className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none"
+                  />
+                  <button
+                    onClick={() => handleTopUp(u.id, parseFloat(topUpAmounts[u.id]))}
+                    className="rounded-lg bg-emerald-600 px-4 py-1.5 text-[11px] font-bold text-white hover:bg-emerald-700 transition"
+                  >
+                    Top up
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => deleteUser(u.id)}
+                    className="flex-1 rounded-lg bg-white border border-rose-200 py-1.5 text-[11px] font-semibold text-rose-600 hover:bg-rose-50"
+                  >
+                    Delete user
+                  </button>
+                  <button
+                    onClick={() => promoteToAgent(u.id)}
+                    className="flex-1 rounded-lg bg-[#1e3a8a] py-1.5 text-[11px] font-semibold text-white hover:bg-[#162b64]"
+                  >
+                    Promote to agent
+                  </button>
+                </div>
               </div>
+
             </div>
           ))}
           {users.length === 0 && (
