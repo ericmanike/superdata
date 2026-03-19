@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import CopyButton from "@/components/ui/CopyButton";
-import type { Bundle, Network, Order, Transaction, User, Wallet } from "@/lib/mockData";
+import type { Bundle, Network as MockNetwork, Order, Transaction, User as MockUser, Wallet } from "@/lib/mockData";
+
+// Extended types for the app from API
+type Network = MockNetwork;
+type User = MockUser & { role?: 'user' | 'agent' | 'admin' | 'moderator' };
 
 const networkColors: Record<string, string> = {
   MTN: "bg-amber-400",
@@ -45,6 +49,7 @@ export default function AdminPage() {
   const [inventoryFilter, setInventoryFilter] = useState<Network | "All">("All");
   const [audienceFilter, setAudienceFilter] = useState<"All" | "user" | "agent">("All");
   const [topUpAmounts, setTopUpAmounts] = useState<Record<string, string>>({});
+  const [promotingId, setPromotingId] = useState<string | null>(null);
 
 
   const normalizedBundles = useMemo(() => {
@@ -148,6 +153,8 @@ export default function AdminPage() {
   }
 
   async function promoteToAgent(userId: string) {
+    if (status.kind === "loading" || promotingId) return;
+    setPromotingId(userId);
     setStatus({ kind: "loading", message: "Promoting user..." });
     try {
       await api("/api/makeAgent", {
@@ -158,7 +165,10 @@ export default function AdminPage() {
       await refreshAll();
       setStatus({ kind: "success", message: "User promoted to agent" });
     } catch (err: any) {
-      setStatus({ kind: "error", message: err?.message });
+      console.error("Promote to agent error:", err);
+      setStatus({ kind: "error", message: err?.message || "Failed to promote user" });
+    } finally {
+      setPromotingId(null);
     }
   }
 
@@ -605,7 +615,16 @@ export default function AdminPage() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-bold text-slate-900">{u.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-slate-900">{u.name}</h3>
+                    <span className={`rounded-md px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                      u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 
+                      u.role === 'agent' ? 'bg-amber-100 text-amber-700' : 
+                      'bg-slate-100 text-slate-600'
+                    }`}>
+                      {u.role || 'user'}
+                    </span>
+                  </div>
                   <p className="text-xs text-slate-500">{u.id}</p>
                 </div>
                 <div className="rounded-lg bg-white px-2 py-1 text-xs font-bold text-[#1e3a8a] shadow-xs">
@@ -647,9 +666,15 @@ export default function AdminPage() {
                   </button>
                   <button
                     onClick={() => promoteToAgent(u.id)}
-                    className="flex-1 rounded-lg bg-[#1e3a8a] py-1.5 text-[11px] font-semibold text-white hover:bg-[#162b64]"
+                    disabled={status.kind === "loading" || promotingId !== null || u.role === 'agent' || u.role === 'admin'}
+                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] font-semibold transition-all ${
+                      u.role === 'agent' || u.role === 'admin' 
+                        ? "bg-slate-200 text-slate-500 cursor-not-allowed border border-slate-300" 
+                        : "bg-[#1e3a8a] text-white hover:bg-[#162b64] shadow-sm active:translate-y-px disabled:opacity-50 disabled:cursor-not-allowed"
+                    }`}
                   >
-                    Promote to agent
+                    {promotingId === u.id && <Loader2 className="h-3 w-3 animate-spin" />}
+                    {u.role === 'agent' ? "Already Agent" : "Promote to agent"}
                   </button>
                 </div>
               </div>

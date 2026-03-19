@@ -25,6 +25,7 @@ export async function GET() {
       name: u.name,
       email: u.email,
       phone: u.phone || "N/A",
+      role: u.role || "user",
       walletBalance: u.walletBalance
     }));
 
