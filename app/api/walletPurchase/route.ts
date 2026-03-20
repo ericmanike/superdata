@@ -26,13 +26,11 @@ export async function POST(req: Request) {
 
 
         await dbConnect();
-        let dbPrice = await Bundle.findOne({ name:bundleName+"GB", network:network,  audience: session.user.role}).select('price');   
-        
+
+        let dbPrice = await Bundle.findOne({ name:bundleName+"GB", network:network,  audience: session.user.role, isActive:true }).select('price');   
         if(session.user.role === "admin") {
             dbPrice = await Bundle.findOne({name:bundleName+"GB", network:network,  audience: "agent"}).select('price');   
         }
-
-        console.log('Database price fetched:', dbPrice); 
        const realPrice = dbPrice ? dbPrice.price : null;
 
         if (realPrice === null) {
@@ -150,6 +148,10 @@ try {
         // user.walletBalance = Number(user.walletBalance) - Number(price);
 
     if (orderRes.success !== true) {
+         
+        await User.findByIdAndUpdate(session.user.id, {
+            $inc: { walletBalance: realPrice }
+        });
        return NextResponse.json({ message: "Order failed. Wallet refunded." }, { status: 500 });
 }
         // Create order record
