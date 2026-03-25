@@ -13,9 +13,10 @@ export async function POST(req: Request) {
         const emailSubject = subject ? `${subject} - from ${name}` : `New Contact Form Submission from ${name}`;
 
         const { data, error } = await resend.emails.send({
-            from: `MegaGigs Contact <${RESEND_FROM_EMAIL}>`,
-            to: ["manikeeric@gmail.com"],
+            from: `Hubsite Data Contact <${RESEND_FROM_EMAIL}>`,
+            to: ["babubright847@gmail.com"],
             subject: emailSubject,
+            replyTo: email,
            
             html: `
                 <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
