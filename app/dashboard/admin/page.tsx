@@ -54,6 +54,30 @@ export default function AdminPage() {
   const [showBundles, setShowBundles] = useState(false);
   const [showOrders, setShowOrders] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
+
+  const filteredUsers = useMemo(() => {
+    if (!userSearch) return users;
+    const lower = userSearch.toLowerCase();
+    return users.filter(u => 
+      u.name.toLowerCase().includes(lower) || 
+      u.email.toLowerCase().includes(lower) || 
+      u.phone?.toLowerCase().includes(lower) ||
+      u.id?.toLowerCase().includes(lower)
+    );
+  }, [users, userSearch]);
+
+  const filteredOrders = useMemo(() => {
+    if (!orderSearch) return orders;
+    const lower = orderSearch.toLowerCase();
+    return orders.filter(o => 
+      o.phone?.toLowerCase().includes(lower) || 
+      o.transactionId?.toLowerCase().includes(lower) ||
+      o.network?.toLowerCase().includes(lower) ||
+      o.bundle?.toLowerCase().includes(lower)
+    );
+  }, [orders, orderSearch]);
 
 
   const normalizedBundles = useMemo(() => {
@@ -564,7 +588,16 @@ export default function AdminPage() {
               <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">{orders.length}</span>
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={orderSearch}
+                onChange={(e) => setOrderSearch(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none min-w-[200px]"
+              />
+            </div>
             <button
               onClick={refreshAll}
               className="text-xs font-semibold text-[#1e3a8a] hover:underline"
@@ -582,7 +615,7 @@ export default function AdminPage() {
         </div>
         {showOrders && (
         <div className="mt-3 grid gap-3 grid-cols-1">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div
               key={order.id}
               className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -663,7 +696,16 @@ export default function AdminPage() {
               <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">{users.length}</span>
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={userSearch}
+                onChange={(e) => setUserSearch(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none min-w-[200px]"
+              />
+            </div>
             <button
               onClick={refreshAll}
               className="text-xs font-semibold text-[#1e3a8a] hover:underline"
@@ -681,7 +723,7 @@ export default function AdminPage() {
         </header>
         {showUsers && (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {users.map((u) => (
+          {filteredUsers.map((u) => (
             <div
               key={u.id}
               className="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition-colors hover:border-slate-300"
