@@ -91,19 +91,19 @@ export default async function DashboardHome() {
     <div className="space-y-8 text-slate-900">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-600 uppercase tracking-widest font-bold">{user?.role || "User"}</p>
+          <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-base text-slate-600 uppercase tracking-widest font-bold">{user?.role || "User"}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/dashboard/buy-data"
-            className="rounded-full bg-[#00c9f5] px-5 py-2 text-sm font-semibold text-slate-900 transition hover:opacity-90"
+            className="rounded-full bg-[#00c9f5] px-5 py-2.5 text-base font-semibold text-slate-900 transition hover:opacity-90"
           >
             Quick Buy Data
           </Link>
           <Link
             href="/dashboard/transactions"
-            className="rounded-full px-5 py-2 text-sm font-semibold text-slate-900 ring-1 ring-slate-900/20 transition hover:ring-slate-900/40"
+            className="rounded-full px-5 py-2.5 text-base font-semibold text-slate-900 ring-1 ring-slate-900/20 transition hover:ring-slate-900/40"
           >
             View Transactions
           </Link>
@@ -116,21 +116,21 @@ export default async function DashboardHome() {
             key={stat.label}
             className="rounded-2xl border border-slate-200 bg-white p-5"
           >
-            <p className="text-sm text-slate-600">{stat.label}</p>
-            <p className="mt-2 text-2xl font-bold text-slate-900">{stat.value}</p>
-            <p className="text-xs text-emerald-700">{stat.change}</p>
+            <p className="text-base text-slate-600">{stat.label}</p>
+            <p className="mt-2 text-3xl font-bold text-slate-900">{stat.value}</p>
+            <p className="text-sm text-emerald-700">{stat.change}</p>
           </div>
         ))}
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">
+          <h2 className="text-xl font-semibold text-slate-900">
             Recent activity
           </h2>
           <Link
             href="/dashboard/orders"
-            className="text-sm font-semibold text-[#1e3a8a]"
+            className="text-base font-semibold text-[#1e3a8a]"
           >
             Manage orders →
           </Link>
@@ -150,20 +150,20 @@ export default async function DashboardHome() {
                   {order.network[0]}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-slate-900">
+                  <p className="text-base font-bold text-slate-900">
                     {order.network} • {order.bundle}
                   </p>
-                  <p className="text-xs font-medium text-slate-500 text-slate-600 font-bold">{order.phone}</p>
+                  <p className="text-sm font-medium text-slate-600 font-bold">{order.phone}</p>
                   <CopyButton
                     text={order.transactionId}
                     prefix="ID:"
-                    className="text-[9px] font-bold text-slate-400"
+                    className="text-xs font-bold text-slate-400"
                   />
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-bold text-slate-900">₵{order.amount.toFixed(2)}</p>
-                <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                <p className="text-base font-bold text-slate-900">₵{order.amount.toFixed(2)}</p>
+                <p className={`text-xs font-bold uppercase tracking-wider ${
                   order.status === 'delivered' ? 'text-emerald-600' : 'text-amber-600'
                 }`}>
                   {order.status}
@@ -172,7 +172,7 @@ export default async function DashboardHome() {
             </div>
           ))}
           {orders.length === 0 && (
-            <div className="py-10 text-center text-sm text-slate-500">
+            <div className="py-10 text-center text-base text-slate-500">
               No recent activity.
             </div>
           )}
@@ -187,8 +187,8 @@ export default async function DashboardHome() {
             </svg>
           </div>
           <div className="space-y-1">
-            <h4 className="font-bold text-emerald-900">Need help?</h4>
-            <p className="text-sm text-emerald-800">Reach our team any time for delivery checks, wallet issues, or payout help.</p>
+            <h4 className="text-lg font-bold text-emerald-900">Need help?</h4>
+            <p className="text-base text-emerald-800">Reach our team any time for delivery checks, wallet issues, or payout help.</p>
           </div>
         </div>
         <a 

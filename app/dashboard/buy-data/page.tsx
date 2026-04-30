@@ -55,8 +55,8 @@ export default function BuyDataPage() {
   return (
     <div className="space-y-6 text-slate-900">
       <div>
-        <p className="text-sm text-slate-600">Checkout</p>
-        <h1 className="text-2xl font-bold text-slate-900">Buy Data</h1>
+        <p className="text-base text-slate-600">Checkout</p>
+        <h1 className="text-3xl font-bold text-slate-900">Buy Data</h1>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -65,7 +65,7 @@ export default function BuyDataPage() {
             key={net}
             type="button"
             onClick={() => setFilter(net)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className={`rounded-full px-5 py-2.5 text-base font-semibold transition ${
               filter === net
                 ? "bg-[#1e3a8a] text-white"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -79,8 +79,8 @@ export default function BuyDataPage() {
       
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Available data packages</h2>
-          <span className="text-sm text-slate-600">Tap a card to buy</span>
+          <h2 className="text-xl font-semibold text-slate-900">Available data packages</h2>
+          <span className="text-base text-slate-600">Tap a card to buy</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {filteredBundles.map((bundle) => (

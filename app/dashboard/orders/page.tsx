@@ -38,8 +38,8 @@ export default async function OrdersPage() {
   return (
     <div className="space-y-6 text-slate-900">
       <div>
-        <p className="text-sm text-slate-600">Fulfillment</p>
-        <h1 className="text-2xl font-bold text-slate-900">My Orders</h1>
+        <p className="text-base text-slate-600">Fulfillment</p>
+        <h1 className="text-3xl font-bold text-slate-900">My Orders</h1>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -51,20 +51,20 @@ export default async function OrdersPage() {
             >
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                  <p className="font-bold text-slate-900">
+                  <p className="text-base font-bold text-slate-900">
                     {order.network} • {order.bundle}
                   </p>
                   <p className="text-sm font-medium text-slate-500">{order.phone}</p>
                   <CopyButton
                     text={order.transactionId}
                     prefix="ORDER ID:"
-                    className="text-[10px] font-bold text-slate-400"
+                    className="text-xs font-bold text-slate-400"
                   />
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <p className="font-bold text-slate-900 text-lg">₵{order.amount.toFixed(2)}</p>
+                  <p className="font-bold text-slate-900 text-xl">₵{order.amount.toFixed(2)}</p>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
                       order.status === "delivered"
                         ? "bg-emerald-100 text-emerald-700"
                         : "bg-amber-100 text-amber-700"
@@ -73,10 +73,10 @@ export default async function OrdersPage() {
                     {order.status}
                   </span>
                   <div className="text-right">
-                    <p className="text-xs font-medium text-slate-400">
+                    <p className="text-sm font-medium text-slate-400">
                       {new Date(order.date).toLocaleDateString()}
                     </p>
-                    <p className="text-xs font-medium text-slate-400">
+                    <p className="text-sm font-medium text-slate-400">
                       {new Date(order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -86,7 +86,7 @@ export default async function OrdersPage() {
           ))}
           {orders.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-sm font-medium text-slate-500">No orders found yet.</p>
+              <p className="text-base font-medium text-slate-500">No orders found yet.</p>
             </div>
           )}
         </div>

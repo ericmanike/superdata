@@ -47,12 +47,12 @@ export default async function WalletPage() {
     <div className="space-y-6 text-slate-900">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-600">Balances & funding</p>
-          <h1 className="text-2xl font-bold text-slate-900">Wallet</h1>
+          <p className="text-base text-slate-600">Balances & funding</p>
+          <h1 className="text-3xl font-bold text-slate-900">Wallet</h1>
         </div>
         <Link
           href="/dashboard/buy-data"
-          className="rounded-full bg-[#00c9f5] px-5 py-2 text-sm font-semibold text-slate-900 transition hover:opacity-90"
+          className="rounded-full bg-[#00c9f5] px-5 py-2.5 text-base font-semibold text-slate-900 transition hover:opacity-90"
         >
           Buy Data
         </Link>
@@ -60,23 +60,23 @@ export default async function WalletPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-600">Wallet balance</p>
-          <p className="mt-3 text-3xl font-black text-slate-900">
+          <p className="text-base text-slate-600">Wallet balance</p>
+          <p className="mt-3 text-4xl font-black text-slate-900">
             ₵{wallet.balance.toFixed(2)}
           </p>
-          <p className="text-xs text-slate-600">
+          <p className="text-sm text-slate-600">
             Updated {new Date(wallet.lastUpdated).toLocaleString()}
           </p>
           <div className="mt-4 flex gap-3">
-            <TopUpWallet className="flex-1 rounded-xl bg-[#00c9f5] text-slate-900 px-4 py-3 text-sm font-semibold transition hover:opacity-90 text-center cursor-pointer">
+            <TopUpWallet className="flex-1 rounded-xl bg-[#00c9f5] text-slate-900 px-5 py-3.5 text-base font-semibold transition hover:opacity-90 text-center cursor-pointer">
               Fund wallet
             </TopUpWallet>
           </div>
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold text-slate-900">Funding options</p>
-          <ul className="mt-3 space-y-2 text-sm text-slate-700">
+          <p className="text-base font-semibold text-slate-900">Funding options</p>
+          <ul className="mt-3 space-y-2 text-base text-slate-700">
             <li>• Mobile money (MTN, Telecel, AirtelTigo)</li>
             <li>• Cards & bank transfers</li>
             <li>• Manual top-up</li>
@@ -88,10 +88,10 @@ export default async function WalletPage() {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Payment history</h2>
+          <h2 className="text-xl font-semibold text-slate-900">Payment history</h2>
           <Link
             href="/dashboard/orders"
-            className="text-sm font-semibold text-[#1e3a8a]"
+            className="text-base font-semibold text-[#1e3a8a]"
           >
             View all →
           </Link>
@@ -100,17 +100,17 @@ export default async function WalletPage() {
           {transactions.map((tx) => (
             <div
               key={tx.id}
-              className="flex items-center justify-between py-3 text-sm text-slate-700"
+              className="flex items-center justify-between py-3 text-base text-slate-700"
             >
               <div>
                 <p className="font-semibold text-slate-900">
                   {tx.network} • {tx.bundle}
                 </p>
-                <p className="text-xs text-slate-500">{tx.phone}</p>
+                <p className="text-sm text-slate-500">{tx.phone}</p>
               </div>
               <div className="text-right">
                 <p className="font-semibold text-slate-900">₵{tx.amount}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm text-slate-500">
                   {new Date(tx.date).toLocaleString()}
                 </p>
               </div>

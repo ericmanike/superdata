@@ -93,8 +93,8 @@ export default function DashboardLayout({
               H
             </span>
             <div>
-              <div className="text-lg font-semibold leading-tight text-white">hubsitedata</div>
-              <div className="text-xs text-slate-100 uppercase tracking-wider font-medium">
+              <div className="text-xl font-semibold leading-tight text-white">hubsitedata</div>
+              <div className="text-sm text-slate-100 uppercase tracking-wider font-medium">
                 {session?.user?.role || "User"}
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center rounded-2xl px-3 py-3 text-sm font-semibold transition ${
+                className={`flex items-center rounded-2xl px-3 py-3 text-base font-semibold transition ${
                   active
                     ? "bg-[#f54a00] text-white"
                     : "text-white hover:text-white hover:underline hover:underline-offset-8 hover:decoration-cyan-100"
@@ -132,7 +132,7 @@ export default function DashboardLayout({
 
         <button 
           onClick={handleLogout}
-          className="mt-6 flex w-full items-center justify-between rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white hover:bg-white/20"
+          className="mt-6 flex w-full items-center justify-between rounded-2xl bg-white/10 px-4 py-3.5 text-base font-semibold text-white hover:bg-white/20"
         >
           <div className="flex items-center">
             <IconWrapper>
@@ -140,7 +140,7 @@ export default function DashboardLayout({
             </IconWrapper>
             Logout
           </div>
-          <span className="text-xs text-slate-100">Shift+L</span>
+          <span className="text-sm text-slate-100">Shift+L</span>
         </button>
       </aside>
 
@@ -154,12 +154,12 @@ export default function DashboardLayout({
               <Menu size={20} />
             </button>
             <div className="min-w-0">
-              <p className="text-[10px] md:text-xs font-medium text-slate-500 line-clamp-1">Welcome back,</p>
+              <p className="text-xs font-medium text-slate-500 line-clamp-1">Welcome back,</p>
               <div className="flex items-center gap-1.5 md:gap-2">
-                <p className="truncate text-sm font-bold text-slate-900 max-w-[120px] sm:max-w-none">
+                <p className="truncate text-base font-bold text-slate-900 max-w-[120px] sm:max-w-none">
                   {session?.user?.name || "User"}
                 </p>
-                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] md:text-xs font-bold uppercase tracking-wider text-slate-500">
                   {session?.user?.role || "User"}
                 </span>
               </div>
@@ -167,7 +167,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
-            <TopUpWallet className="flex items-center gap-2 rounded-full bg-[#00caf5] px-3 py-2 md:px-5 md:py-2.5 text-xs md:text-sm font-bold text-slate-900 transition hover:opacity-90 shadow-sm">
+            <TopUpWallet className="flex items-center gap-2 rounded-full bg-[#00caf5] px-4 py-2.5 md:px-5 md:py-2.5 text-sm md:text-sm font-bold text-slate-900 transition hover:opacity-90 shadow-sm">
               <Plus size={16} strokeWidth={3} />
               <span className="hidden sm:inline">Top up wallet</span>
               <span className="sm:hidden">Fund</span>
