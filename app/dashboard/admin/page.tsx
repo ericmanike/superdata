@@ -105,6 +105,13 @@ export default function AdminPage() {
     price: 5,
     audience: "user" as "user" | "agent"
   });
+  const [editingBundle, setEditingBundle] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({
+    network: "MTN" as Network,
+    size: "",
+    price: 0,
+    audience: "user" as "user" | "agent"
+  });
 
   useEffect(() => {
     refreshAll();
@@ -161,6 +168,24 @@ export default function AdminPage() {
       setStatus({ kind: "success", message: "Bundle created" });
     } catch (err: any) {
       setStatus({ kind: "error", message: err?.message });
+    }
+  }
+
+  async function handleEditBundle(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingBundle) return;
+    setStatus({ kind: "loading", message: "Updating bundle..." });
+    try {
+      await api(`/api/bundles/${editingBundle.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
+      await refreshAll();
+      setEditingBundle(null);
+      setStatus({ kind: "success", message: "Bundle updated successfully" });
+    } catch (err: any) {
+      setStatus({ kind: "error", message: err?.message || "Failed to update bundle" });
     }
   }
 
@@ -558,12 +583,28 @@ export default function AdminPage() {
                     </span>
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <button
-                      onClick={() => deleteBundle(b.id)}
-                      className="rounded-lg border border-rose-100 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 hover:border-rose-300"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingBundle(b);
+                          setEditForm({
+                            network: b.network,
+                            size: b.size,
+                            price: b.price,
+                            audience: b.audience,
+                          });
+                        }}
+                        className="rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-bold text-[#1e3a8a] transition hover:bg-blue-50 hover:border-blue-300"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteBundle(b.id)}
+                        className="rounded-lg border border-rose-100 bg-white px-3 py-1.5 text-xs font-bold text-rose-600 transition hover:bg-rose-50 hover:border-rose-300"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -810,6 +851,99 @@ export default function AdminPage() {
           {JSON.stringify({ bundlesCount: bundles.length, usersCount: users.length, status }, null, 2)}
         </pre>
       </details>
+
+      {editingBundle && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-wide text-slate-500 font-semibold">Bundles</p>
+                <h3 className="text-xl font-bold text-slate-900">Edit package</h3>
+              </div>
+              <button 
+                className="text-slate-400 hover:text-slate-700 text-2xl leading-none font-bold" 
+                onClick={() => setEditingBundle(null)}
+              >
+                &times;
+              </button>
+            </div>
+
+            <form className="mt-4 space-y-4" onSubmit={handleEditBundle}>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-slate-600">Network</label>
+                <select
+                  value={editForm.network}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, network: e.target.value as Network }))
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none"
+                >
+                  {networks.map((net) => (
+                    <option key={net} value={net}>
+                      {net}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-slate-600">Size</label>
+                <input
+                  value={editForm.size}
+                  onChange={(e) => setEditForm((f) => ({ ...f, size: e.target.value }))}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none"
+                  placeholder="e.g. 5 GB"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-slate-600">Price (GHS)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editForm.price}
+                  onChange={(e) => setEditForm((f) => ({ ...f, price: parseFloat(e.target.value) }))}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none"
+                  placeholder="8.30"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-slate-600">Audience</label>
+                <select
+                  value={editForm.audience}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, audience: e.target.value as any }))
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base font-semibold focus:border-[#1e3a8a] focus:ring-1 focus:ring-[#1e3a8a] outline-none"
+                >
+                  <option value="user">Regular Users</option>
+                  <option value="agent">Premium Agents</option>
+                </select>
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingBundle(null)}
+                  className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={status.kind === "loading"}
+                  className="flex-1 rounded-xl bg-[#1e3a8a] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#162b64] disabled:opacity-50"
+                >
+                  {status.kind === "loading" ? "Saving..." : "Save changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

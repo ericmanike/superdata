@@ -18,13 +18,21 @@ export async function PATCH(
 
         const { id } = await params;
         const body = await req.json();
-        const { network, name, price, isActive } = body;
+        const { network, name, size, price, isActive, audience } = body;
+        const updatedName = name || size;
 
         await dbConnect();
 
+        const updateData: any = {};
+        if (network !== undefined) updateData.network = network;
+        if (updatedName !== undefined) updateData.name = updatedName;
+        if (price !== undefined) updateData.price = price;
+        if (isActive !== undefined) updateData.isActive = isActive;
+        if (audience !== undefined) updateData.audience = audience;
+
         const bundle = await Bundle.findByIdAndUpdate(
             id,
-            { network, name, price, isActive },
+            updateData,
             { new: true, runValidators: true }
         );
 
