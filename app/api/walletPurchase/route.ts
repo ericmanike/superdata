@@ -26,13 +26,12 @@ export async function POST(req: Request) {
 
 
         await dbConnect();
-
-        let dbPrice = await Bundle.findOne({ name:bundleName+"GB", network:network,  audience: session.user.role, isActive:true }).select('price');   
-        if(session.user.role === "admin") {
-            dbPrice = await Bundle.findOne({name:bundleName+"GB", network:network,  audience: "agent"}).select('price');   
-        }
+        console.log(' bundleName:',  bundleName);
+  let dbPrice  = await Bundle.findOne({name:bundleName+"GB", network:network.toUpperCase(),audience:session.user.role=="user"?"user":"agent",  isActive:true }).select('price');   
+      
+     console.log("bundleprice", dbPrice)
        const realPrice = dbPrice ? dbPrice.price : null;
-
+     console.log("Real price " + realPrice)
         if (realPrice === null) {
             return NextResponse.json({ message: "Bundle not found" }, { status: 404 });
         }

@@ -120,7 +120,7 @@ const handleWalletPayment = async() => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         network: summary.network,
-        bundleName: summary.size.slice(0, -2),
+        bundleName: summary.size.replaceAll('GB', ''),
         price: summary.price,
         phoneNumber: phone,
         reference: Date.now(),
