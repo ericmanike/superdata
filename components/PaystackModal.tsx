@@ -30,12 +30,7 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
   if (!open || !summary) return null;
 
   const handlePayment = () => {
-    console.log("handlePayment triggered", { 
-      email: session?.user?.email, 
-      phone, 
-      summary, 
-      paystackPopExists: !!(window as any).PaystackPop 
-    });
+  
 
     if (!session?.user?.email) {
       toast.error("Please login to purchase");

@@ -238,37 +238,37 @@ export async function POST(req: Request) {
     });
 
     //place order
-    const placeOrder = await fetch(
-      "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": `${DAKAZI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          recipient_msisdn: phoneNumber,
-          network_id: networkId,
-          shared_bundle: Number(bundleName),
-          incoming_api_ref: reference
-        })
-      }
-    );
+    // const placeOrder = await fetch(
+    //   "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //       "x-api-key": `${DAKAZI_API_KEY}`,
+    //     },
+    //     body: JSON.stringify({
+    //       recipient_msisdn: phoneNumber,
+    //       network_id: networkId,
+    //       shared_bundle: Number(bundleName),
+    //       incoming_api_ref: reference
+    //     })
+    //   }
+    // );
 
-    const Orderres = await placeOrder.json().catch(() => {});
-    console.log('Raw response:', Orderres);
+    // const Orderres = await placeOrder.json().catch(() => {});
+    // console.log('Raw response:', Orderres);
 
-    if (!placeOrder.ok) {
+    // if (!placeOrder.ok) {
 
-      return NextResponse.json({ error: ' could not place an order' }, { status: 500 });
+    //   return NextResponse.json({ error: ' could not place an order' }, { status: 500 });
 
-    }
+    // }
 
 
 
-    console.log(' purchase order response:', Orderres)
+    // console.log(' purchase order response:', Orderres)
 
-    const transaction_id = Orderres.transaction_code
+    const transaction_id = `TXT - ${Date.now()}`
      await Order.findByIdAndUpdate(order._id, { transaction_id });    
 
    

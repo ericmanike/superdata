@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
@@ -6,16 +6,25 @@ import Order from "@/lib/models/Order";
 import User from "@/lib/models/User";
 
 import Bundle from "@/lib/models/Bundle";
+import { orders } from "@/lib/mockData";
 
 
 export async function POST(req: Request) {
     try {
+     
+
+
+
+
+
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const { network, bundleName, price, phoneNumber } = await req.json();
+
+    
+        const { ordersClose = 'closed', network, bundleName, price, phoneNumber } = await req.json();
 
         console.log('Received wallet purchase data:', { network, bundleName, price, phoneNumber });
 
@@ -23,6 +32,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
         }
 
+     
 
 
         await dbConnect();
@@ -104,59 +114,58 @@ export async function POST(req: Request) {
       
         console.log(`Deducted ${price} from wallet. New balance: ${updatedUser.walletBalance}`);
 
-        // Place order with Dakazi
-        const placeOrder = await fetch(
-            "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-api-key": `${DAKAZI_API_KEY}`,
-                }, 
-                body: JSON.stringify({
-                    recipient_msisdn: phoneNumber.trim(),
-                    network_id: networkId,
-                    shared_bundle: Number(bundleName),
-                    incoming_api_ref: reference
-                })
-            }
+        // // Place order with Dakazi
+        // const placeOrder = await fetch(
+        //     "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
+        //     {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //             "x-api-key": `${DAKAZI_API_KEY}`,
+        //         }, 
+        //         body: JSON.stringify({
+        //             recipient_msisdn: phoneNumber.trim(),
+        //             network_id: networkId,
+        //             shared_bundle: Number(bundleName),
+        //             incoming_api_ref: reference
+        //         })
+        //     }
 
-        );
+        // );
 
        
-        let orderRes;
+        // let orderRes;
 
-try {
-    const raw = await placeOrder.text();
-    orderRes = JSON.parse(raw);
-} catch(error) {
-    console.log('Error placing order:', error);
-    await User.findByIdAndUpdate(session.user.id, {
-        $inc: { walletBalance: realPrice }
-    });
+// try {
+//     const raw = await placeOrder.text();
+//     orderRes = JSON.parse(raw);
+// } catch(error) {
+//     console.log('Error placing order:', error);
+//     await User.findByIdAndUpdate(session.user.id, {
+//         $inc: { walletBalance: realPrice }
+//     });
 
-    return NextResponse.json({
-        message: "Provider error. Wallet refunded."
-    }, { status: 500 });
-}
-        console.log('Order placement response:', orderRes);
+//     return NextResponse.json({
+//         message: "Provider error. Wallet refunded."
+//     }, { status: 500 });
+// }
+      //  console.log('Order placement response:', orderRes);
   
        
 
    
         // user.walletBalance = Number(user.walletBalance) - Number(price);
 
-    if (orderRes.success !== true) {
+    //if (orderRes.success !== true) {}
          
         await User.findByIdAndUpdate(session.user.id, {
             $inc: { walletBalance: realPrice }
         });
-       return NextResponse.json({ message: "Order failed. Wallet refunded." }, { status: 500 });
-}
-        // Create order record
+    
+      // Create order record
         const order = await Order.create({
             user: session.user.id,
-            transaction_id: orderRes.transaction_code,
+            transaction_id: `TXT-${Date.now()}`,
             network: network,
             bundleName: bundleName,
             price: realPrice,
