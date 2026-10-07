@@ -4,13 +4,14 @@ export interface ITransaction extends Document {
   user: mongoose.Types.ObjectId | string;
   reference: string;
   amount: number;
-  type: "topup" | "purchase" | "refund" | "admin_adjustment";
+  type: "topup" | "purchase" | "upgrade" | "refund" | "admin_adjustment";
   paymentMethod: string;
   status: "pending" | "success" | "failed";
   description?: string;
   metadata?: any;
   createdAt: Date;
   updatedAt: Date;
+  
 }
 
 const TransactionSchema = new Schema<ITransaction>(
@@ -20,7 +21,7 @@ const TransactionSchema = new Schema<ITransaction>(
     amount: { type: Number, required: true },
     type: {
       type: String,
-      enum: ["topup", "purchase", "refund", "admin_adjustment"],
+      enum: ["topup", "purchase", "refund","upgrade", "admin_adjustment"],
       default: "topup",
     },
     paymentMethod: { type: String, default: "moolre" },

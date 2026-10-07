@@ -1,67 +1,83 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import User from "@/lib/models/User";
+import Transaction from "@/lib/models/Transaction";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: "Unauthorized. Please log in." }, { status: 401 });
+  }
+
+  if (session.user.role === "admin") {
+    return NextResponse.json({ message: "Admin role cannot be modified." }, { status: 400 });
+  }
+
+  try {
+    await dbConnect();
+    const body = await req.json().catch(() => ({}));
+    const userId = session.user.id;
+    const email = session.user.email || body.email;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
-    if(session.user.role == "admin"){
-        console.log("Admin cannot register as an agent")
-        return NextResponse.json({ message: "Admin cannot register as an agent" }, { status: 400 });
+
+    if (user.role === "agent") {
+      return NextResponse.json({ message: "You are already registered as an agent.", role: "agent" }, { status: 200 });
     }
 
-    try {
-        await dbConnect();
-        const { reference } = await req.json();
-        const email = session.user.email;
 
-        if (!email) {
-            return NextResponse.json({ message: "User email not found in session" }, { status: 400 });
-        }
+    // 2. Wallet Balance Upgrade Option (Standard Upgrade Fee: 30 GHS)
+    const UPGRADE_FEE = 30;
+    const currentBalance = user.walletBalance || 0;
 
-        const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-        const upgradeFee = 30;
-        const totalAmount = upgradeFee * 1.02; // 30 GHS + 2% fees
+    if (currentBalance >= UPGRADE_FEE) {
+      const updatedUser = await User.findOneAndUpdate(
+        { _id: user._id, walletBalance: { $gte: UPGRADE_FEE } },
+        {
+          $inc: { walletBalance: -UPGRADE_FEE },
+          $set: { role: "agent" },
+        },
+        { returnDocument: "after" }
+      );
 
-        const verifyResponse = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-            headers: {
-                Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-            },
+      if (updatedUser) {
+        await Transaction.create({
+          user: user._id,
+          reference: `upgrade_${Date.now()}_${user._id}`,
+          amount: UPGRADE_FEE,
+          type: "upgrade",
+          paymentMethod: "wallet",
+          status: "success",
+          description: "Agent account upgrade fee deducted from wallet balance",
         });
 
-        const paystackData = await verifyResponse.json();
-
-        if (!paystackData.status || paystackData.data.status !== 'success') {
-            return NextResponse.json({ message: "Payment verification failed" }, { status: 400 });
-        }
-
-        const amountInGHS = paystackData.data.amount / 100;
-        // Check if the amount paid covers the fee
-        if (amountInGHS < totalAmount - 0.1) {
-            return NextResponse.json({ message: "Payment amount does not match" }, { status: 400 });
-        }
-
-        const user = await User.findOne({ email });
-        if (!user) {
-            return NextResponse.json({ message: "User not found" }, { status: 404 });
-        }
-
-        if (user.role === "admin") {
-            return NextResponse.json({ message: "Admin role cannot be downgraded" }, { status: 400 });
-        }
-
-        if (user.role !== "agent") {
-            user.role = "agent";
-            await user.save();
-        }
-        console.log("User role updated to agent", session.user.role)  
-        return NextResponse.json({ message: "Agent registered successfully" }, { status: 200 });
-    } catch (error: any) {
-        console.error("Register agent error:", error);
-        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+        return NextResponse.json(
+          {
+            message: "Successfully upgraded to Agent status!",
+            role: "agent",
+            newBalance: updatedUser.walletBalance,
+          },
+          { status: 200 }
+        );
+      }
     }
+
+    // 3. Insufficient balance fallback message
+    return NextResponse.json(
+      {
+        message: `Insufficient wallet balance. An upgrade fee of ₵${UPGRADE_FEE.toFixed(2)} is required (Current balance: ₵${currentBalance.toFixed(2)}). Please top up your wallet first.`,
+        requiredAmount: UPGRADE_FEE,
+        currentBalance: currentBalance,
+      },
+      { status: 400 }
+    );
+  } catch (error: any) {
+    console.error("Register agent error:", error);
+    return NextResponse.json({ message: "Internal server error", error: error?.message }, { status: 500 });
+  }
 }

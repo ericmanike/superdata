@@ -43,77 +43,44 @@ function BecomeAgent({ className, children }: BecomeAgentProps) {
         loadPaystackScript()
     }, [])
 
-    const handleTopUp = () => {
-        if (!session) {
-            toast.error('Please login to continue')
+    const handleUpgrade = async () => {
+        if (!session?.user?.email) {
+            toast.error('Please login to continue');
             return;
         }
+
         try {
-            if (!session?.user?.email) {
-                toast.error('Please login to continue')
-                return;
-            }
-            if (session?.user?.role === 'agent') {
-                toast.info('You are already an agent')
-                return;
-            }
+            const response = await fetch('/api/registerAgent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: session.user.email,
+                }),
+            });
 
-            const reference = Date.now().toString()
+            const data = await response.json();
 
-            const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
-            if (!paystackKey) {
-                throw new Error('Paystack public key not found');
-            }
-            if (!window.PaystackPop) {
-                console.log('Paystack script not loaded');
+            if (!response.ok) {
+                toast.error(data.message || 'Failed to upgrade to agent');
                 return;
             }
 
-            const handler = window.PaystackPop.setup({
-                key: paystackKey!,
-                email: session?.user?.email!,
-                currency: 'GHS',
-                amount: Math.round((30 + 30 * 0.02) * 100), // Convert to kobo
-
-                ref: reference,
-                onClose: () => {
-
-                },
-                callback: function (response: any) {
-                    (async () => {
-                        try {
-                            const verifyResponse = await fetch('/api/registerAgent', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    email: session?.user?.email!,
-                                    reference,
-                                }),
-                            });
-
-                            if (verifyResponse.ok) {
-                                await update({ role: 'agent' })
-                                console.log("User successfully registered as agent");
-                                window.location.reload()
-                            }
-                        } catch (err) {
-                            console.error('Error verifying payment', err);
-                        }
-                    })();
-                },
-            })
-
-            handler.openIframe()
+            toast.success(data.message || 'Successfully upgraded to agent!');
+            if (update) {
+                await update({ role: 'agent' });
+            }
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } catch (error) {
-            console.error(error);
-            toast.error("Something went wrong with the purchase.");
+            console.error('Error upgrading to agent:', error);
+            toast.error('An error occurred while upgrading to agent');
         }
-
     }
 
     return (
         <button
-            onClick={handleTopUp}
+            onClick={handleUpgrade}
             className={className || `w-full flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-2.5 ${session?.user?.role === 'agent' ? 'bg-gray-400' : 'bg-green-600 hover:bg-green-700'}
              text-white rounded-lg font-semibold text-[10px] md:text-sm transition-all shadow-md hover:shadow-lg`}
             disabled={session?.user?.role === 'agent'}
