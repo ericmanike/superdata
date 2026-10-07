@@ -73,9 +73,9 @@ export function CheckoutModal({ open, onClose, phone, onPhoneChange, summary }: 
 
 
 
-    const username = process.env.NEXT_PUBLIC_MOOLRE_USERNAME || process.env.MOOLRE_USERNAME || "";
-    const publicKey = process.env.NEXT_PUBLIC_MOOLRE_PK || process.env.NEXT_PUBLIC_MOOLRE_PUBLIC_KEY || process.env.MOOLRE_PK || "";
-    const accountNumber = process.env.NEXT_PUBLIC_MOOLRE_ACCOUNT_NUMBER || process.env.MOOLRE_ACCOUNT_NUMBER || "";
+    const username = process.env.NEXT_PUBLIC_MOOLRE_USERNAME || "";
+    const publicKey = process.env.NEXT_PUBLIC_MOOLRE_PK || "";
+    const accountNumber = process.env.NEXT_PUBLIC_MOOLRE_ACCOUNT_NUMBER || "";
 
     if (!publicKey || !username || !accountNumber) {
       toast.error("Moolre payment configuration missing. Please check credentials.");
