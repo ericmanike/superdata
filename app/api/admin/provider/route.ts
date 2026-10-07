@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     const updatedSetting = await Setting.findOneAndUpdate(
       { key: "activeProvider" },
       { value: provider },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return NextResponse.json({

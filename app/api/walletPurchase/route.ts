@@ -75,7 +75,7 @@ export async function POST(req: Request) {
     const updatedUser = await User.findOneAndUpdate(
       { _id: session.user.id, walletBalance: { $gte: realPrice } },
       { $inc: { walletBalance: -realPrice } },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedUser) {

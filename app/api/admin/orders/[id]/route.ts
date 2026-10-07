@@ -58,7 +58,7 @@ export async function PATCH(
         const order = await Order.findByIdAndUpdate(
             id,
             { status },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!order) {

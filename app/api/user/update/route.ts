@@ -22,7 +22,7 @@ export async function PUT(req: NextRequest) {
         const updatedUser = await User.findByIdAndUpdate(
             session.user.id,
             { name, phone },
-            { new: true, runValidators: true }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!updatedUser) {

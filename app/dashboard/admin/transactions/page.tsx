@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CopyButton from "@/components/ui/CopyButton";
-import { Landmark, ArrowDownLeft, RefreshCw, Search, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Landmark, ArrowDownLeft, RefreshCw, Search, Clock } from "lucide-react";
 
 type TransactionItem = {
   id: string;
@@ -99,20 +99,20 @@ export default function AdminTransactionsPage() {
   }, [transactions]);
 
   return (
-    <div className="space-y-6 md:space-y-8 text-slate-900">
+    <div className="w-full max-w-full min-w-0 space-y-6 md:space-y-8 text-slate-900 overflow-x-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs md:text-sm text-slate-600 font-medium">Admin Financial Control</p>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2.5">
-            <Landmark className="h-7 w-7 text-amber-500" />
-            Wallet Top-up Transactions
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2.5 truncate">
+            <Landmark className="h-7 w-7 text-amber-500 shrink-0" />
+            <span className="truncate">Wallet Top-up Transactions</span>
           </h1>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           {status.kind !== "idle" && (
             <div
-              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold ${
+              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold max-w-[200px] truncate ${
                 status.kind === "error"
                   ? "bg-rose-100 text-rose-700"
                   : status.kind === "success"
@@ -125,7 +125,7 @@ export default function AdminTransactionsPage() {
           )}
           <button
             onClick={fetchTransactions}
-            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800 shadow-sm"
+            className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-slate-800 shadow-sm shrink-0"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -135,79 +135,79 @@ export default function AdminTransactionsPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-xs">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-xs min-w-0">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Total Wallet Deposits
             </span>
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-100 text-emerald-700">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-100 text-emerald-700 shrink-0">
               <ArrowDownLeft className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-black text-slate-900">
+          <p className="mt-2 text-2xl font-black text-slate-900 truncate">
             ₵{stats.totalDeposits.toFixed(2)}
           </p>
-          <p className="mt-1 text-xs text-slate-500 font-medium">
+          <p className="mt-1 text-xs text-slate-500 font-medium truncate">
             {stats.successfulCount} successful deposits
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-xs">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-xs min-w-0">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Pending Top-ups
             </span>
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-700">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-amber-100 text-amber-700 shrink-0">
               <Clock className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-black text-slate-900">{stats.pendingCount}</p>
-          <p className="mt-1 text-xs text-slate-500 font-medium">Awaiting payment verification</p>
+          <p className="mt-2 text-2xl font-black text-slate-900 truncate">{stats.pendingCount}</p>
+          <p className="mt-1 text-xs text-slate-500 font-medium truncate">Awaiting verification</p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-xs sm:col-span-2 lg:col-span-1">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-xs sm:col-span-2 lg:col-span-1 min-w-0">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Total Top-up Records
             </span>
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-purple-100 text-purple-700">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-purple-100 text-purple-700 shrink-0">
               <Landmark className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-2 text-2xl font-black text-slate-900">{stats.totalCount}</p>
-          <p className="mt-1 text-xs text-slate-500 font-medium">Transaction logs stored</p>
+          <p className="mt-2 text-2xl font-black text-slate-900 truncate">{stats.totalCount}</p>
+          <p className="mt-1 text-xs text-slate-500 font-medium truncate">Logs stored in database</p>
         </div>
       </div>
 
       {/* Main Transactions Log Section */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-xs">
+      <section className="rounded-2xl border border-slate-200 bg-white p-4 md:p-6 shadow-xs min-w-0 max-w-full overflow-hidden">
         <header className="mb-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Audit Logs</p>
-            <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-slate-900 truncate">
               Wallet Deposits & Top-ups
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 shrink-0">
                 {filteredTransactions.length}
               </span>
             </h2>
           </div>
 
           {/* Controls & Filters */}
-          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 max-w-full">
             {/* Search Input */}
             <div className="relative flex-1 sm:flex-none">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search reference, email, name..."
+                placeholder="Search reference, email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full sm:w-64 rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3.5 py-2 text-xs font-semibold text-slate-900 focus:border-[#1e3a8a] focus:bg-white focus:ring-1 focus:ring-[#1e3a8a] outline-none transition"
+                className="w-full sm:w-56 rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3.5 py-2 text-xs font-semibold text-slate-900 focus:border-[#1e3a8a] focus:bg-white focus:ring-1 focus:ring-[#1e3a8a] outline-none transition"
               />
             </div>
 
             {/* Status Filter Buttons */}
-            <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 overflow-x-auto">
+            <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 overflow-x-auto max-w-full">
               {(["all", "success", "pending", "failed"] as const).map((s) => (
                 <button
                   key={s}
@@ -234,14 +234,14 @@ export default function AdminTransactionsPage() {
             return (
               <div
                 key={tx.id}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs space-y-2.5 shadow-2xs"
+                className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs space-y-2.5 shadow-2xs min-w-0"
               >
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
                     <ArrowDownLeft className="h-3 w-3" /> Wallet Deposit
                   </span>
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0 ${
                       isSuccess
                         ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                         : isFailed
@@ -253,8 +253,8 @@ export default function AdminTransactionsPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 pr-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0 flex-1">
                     <p className="font-bold text-slate-900 text-sm truncate">{tx.userName}</p>
                     <p className="text-slate-500 text-[11px] truncate">{tx.userId}</p>
                   </div>
@@ -263,13 +263,13 @@ export default function AdminTransactionsPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-slate-200/60 pt-2 text-slate-600 font-medium">
-                  <span>{tx.description || "Wallet Top-up"}</span>
-                  <span className="text-[11px] text-slate-400">{new Date(tx.date).toLocaleDateString()}</span>
+                <div className="flex items-center justify-between border-t border-slate-200/60 pt-2 text-slate-600 font-medium text-[11px] gap-2">
+                  <span className="truncate">{tx.description || "Wallet Top-up"}</span>
+                  <span className="text-slate-400 shrink-0">{new Date(tx.date).toLocaleDateString()}</span>
                 </div>
 
-                <div className="pt-1">
-                  <CopyButton text={tx.id} prefix="REF:" className="text-[10px] font-mono text-slate-500" />
+                <div className="pt-1 min-w-0 overflow-hidden">
+                  <CopyButton text={tx.id} prefix="REF:" className="text-[10px] font-mono text-slate-500 max-w-full truncate" />
                 </div>
               </div>
             );
@@ -279,18 +279,18 @@ export default function AdminTransactionsPage() {
           )}
         </div>
 
-        {/* Tablet & Desktop View: Table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {/* Tablet & Desktop View: Responsive Horizontally Scrollable Table */}
+        <div className="hidden md:block w-full max-w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs min-w-0">
+          <table className="w-full min-w-[950px] text-left border-collapse table-auto">
             <thead>
-              <tr className="border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Customer / User</th>
-                <th className="px-4 py-3">Gateway / Method</th>
-                <th className="px-4 py-3">Reference ID</th>
-                <th className="px-4 py-3 text-right">Amount Credited</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3 text-center">Status</th>
+              <tr className="border-b border-slate-200 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <th className="px-4 py-3.5 whitespace-nowrap w-[110px]">Type</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[180px]">Customer / User</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[220px]">Gateway / Method</th>
+                <th className="px-4 py-3.5 whitespace-nowrap min-w-[260px]">Reference ID</th>
+                <th className="px-4 py-3.5 text-right whitespace-nowrap w-[140px]">Amount Credited</th>
+                <th className="px-4 py-3.5 whitespace-nowrap w-[180px]">Date</th>
+                <th className="px-4 py-3.5 text-center whitespace-nowrap w-[110px]">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -300,41 +300,43 @@ export default function AdminTransactionsPage() {
 
                 return (
                   <tr key={tx.id} className="group hover:bg-slate-50/80 transition-colors">
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                         <ArrowDownLeft className="h-3 w-3" /> Top-up
                       </span>
                     </td>
-                    <td className="px-4 py-4">
-                      <div>
-                        <p className="font-bold text-slate-900 text-sm">{tx.userName}</p>
-                        <p className="text-xs text-slate-500">{tx.userId}</p>
+                    <td className="px-4 py-4 min-w-[180px]">
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 text-sm truncate">{tx.userName}</p>
+                        <p className="text-xs text-slate-500 truncate">{tx.userId}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
-                      <div>
-                        <p className="font-semibold text-slate-900 text-sm">
+                    <td className="px-4 py-4 min-w-[220px]">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-900 text-sm truncate">
                           {tx.phone || "MOOLRE"}
                         </p>
-                        <p className="text-xs text-slate-500">{tx.description || "Wallet deposit"}</p>
+                        <p className="text-xs text-slate-500 truncate">{tx.description || "Wallet deposit"}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
-                      <CopyButton
-                        text={tx.id}
-                        prefix="REF:"
-                        className="text-xs font-mono font-semibold text-slate-600"
-                      />
+                    <td className="px-4 py-4 min-w-[260px]">
+                      <div className="min-w-0">
+                        <CopyButton
+                          text={tx.id}
+                          prefix="REF:"
+                          className="text-xs font-mono font-semibold text-slate-600 truncate max-w-full"
+                        />
+                      </div>
                     </td>
-                    <td className="px-4 py-4 text-right">
+                    <td className="px-4 py-4 text-right whitespace-nowrap">
                       <span className="font-black text-sm text-emerald-700">
                         +₵{tx.amount?.toFixed(2)}
                       </span>
                     </td>
-                    <td className="px-4 py-4 text-xs text-slate-500 font-medium">
+                    <td className="px-4 py-4 text-xs text-slate-500 font-medium whitespace-nowrap">
                       {new Date(tx.date).toLocaleString()}
                     </td>
-                    <td className="px-4 py-4 text-center">
+                    <td className="px-4 py-4 text-center whitespace-nowrap">
                       <span
                         className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
                           isSuccess

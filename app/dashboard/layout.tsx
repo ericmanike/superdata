@@ -264,7 +264,7 @@ export default function DashboardLayout({
         </button>
       </aside>
 
-      <div className="flex flex-1 flex-col md:ml-72">
+      <div className="flex flex-1 flex-col md:ml-72 min-w-0 max-w-full overflow-x-hidden">
         <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 md:py-4">
           <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
             <button
@@ -301,7 +301,7 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 bg-gray-300 px-4 py-6 md:px-8">
+        <main className="flex-1 bg-gray-300 px-4 py-6 md:px-8 min-w-0 max-w-full">
           {children}
         </main>
       </div>

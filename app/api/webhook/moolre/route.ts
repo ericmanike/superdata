@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
         const updatedUser = await User.findByIdAndUpdate(
           userId,
           { $inc: { walletBalance: topupAmount } },
-          { new: true }
+          { returnDocument: 'after' }
         );
 
         if (updatedUser) {

@@ -53,33 +53,8 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
         externalRef: reference,
         currency: "GHS",
         onSuccess: async (transaction: any) => {
-          console.log("Moolre wallet topup callback:", transaction);
-          try {
-            const verifyResponse = await fetch('/api/topupWallet', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                amount: amountNum,
-                reference: transaction?.externalRef || reference,
-              }),
-            });
-
-            if (verifyResponse.ok) {
-              const data = await verifyResponse.json().catch(() => ({}));
-              toast.success(data.message || 'Wallet topped up successfully!');
-              setIsOpen(false);
-              window.location.reload();
-            } else {
-              const err = await verifyResponse.json().catch(() => ({}));
-              console.error('Wallet topup verification failed:', err);
-              toast.error(err.message || 'Wallet topup verification failed');
-              setIsLoading(false);
-            }
-          } catch (err) {
-            console.error('Error verifying wallet topup:', err);
-            toast.error('Network error verifying wallet topup');
-            setIsLoading(false);
-          }
+          toast.success("Payment successful");
+          window.location.reload()
         },
         onCancel: () => {
           console.log('Moolre payment cancelled');
