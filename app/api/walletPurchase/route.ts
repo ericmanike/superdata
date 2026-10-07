@@ -25,20 +25,33 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    // Verify real price from Bundle collection
-    const bundleQueryName = String(bundleName).toUpperCase().endsWith("GB") ? bundleName : `${bundleName}GB`;
-    const dbPrice = await Bundle.findOne({
-      name: bundleQueryName,
-      network: network.toUpperCase(),
+    // Verify real price from Bundle collection with flexible matching (case-insensitive network & size spacing)
+    const rawVolume = String(bundleName).replace(/GB$/i, "").trim();
+    const networkRegex = new RegExp(`^${network.trim()}$`, "i");
+    const nameRegex = new RegExp(`^${rawVolume}\\s*(GB)?$`, "i");
+
+    let dbPrice = await Bundle.findOne({
+      network: networkRegex,
+      name: nameRegex,
       audience: session.user.role === "user" ? "user" : "agent",
-      isActive: true,
+      $or: [{ isActive: true }, { isActive: { $exists: false } }],
     }).select("price");
+
+    if (!dbPrice) {
+      console.log(`Bundle not found with specific audience. Trying fallback query for volume [${rawVolume}] & network [${network}]...`);
+      dbPrice = await Bundle.findOne({
+        network: networkRegex,
+        name: nameRegex,
+        $or: [{ isActive: true }, { isActive: { $exists: false } }],
+      }).select("price");
+    }
 
     console.log("Database price fetched:", dbPrice);
     const realPrice = dbPrice ? dbPrice.price : null;
 
     if (realPrice === null) {
-      return NextResponse.json({ message: "Bundle not found" }, { status: 404 });
+      console.error(`❌ Bundle not found in database for network: ${network}, volume: ${bundleName}`);
+      return NextResponse.json({ message: `Bundle package (${bundleName} on ${network}) not found.` }, { status: 404 });
     }
 
     // Get user and check wallet balance

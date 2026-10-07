@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
-import Order from "@/lib/models/Order";
+import Transaction from "@/lib/models/Transaction";
+import User from "@/lib/models/User";
 
 export async function GET() {
   try {
@@ -12,28 +13,32 @@ export async function GET() {
     }
 
     await dbConnect();
-    
-    let query = {};
-    if (session.user.role !== 'admin') {
-      query = { user: session.user.id };
-    }
 
-    const orders = await Order.find(query).sort({ createdAt: -1 });
-    
-    const transactions = orders.map(o => ({
-      id: (o.transaction_id || "PENDING").toUpperCase(),
-      userId: o.user?.toString() || "Guest",
-      network: o.network,
-      phone: o.phoneNumber,
-      bundle: o.bundleName,
-      amount: o.price,
-      status: o.status === 'delivered' ? 'Success' : o.status === 'failed' ? 'Failed' : 'Pending',
-      date: o.createdAt.toISOString()
+    const query = session.user.role === "admin" ? {} : { user: session.user.id };
+
+    // Fetch ONLY Transaction model records (wallet topups, deposits, adjustments)
+    const txRecords = await Transaction.find(query)
+      .populate("user", "name email role")
+      .sort({ createdAt: -1 });
+
+    const formattedTx = txRecords.map((t: any) => ({
+      id: (t.reference || "TX").toUpperCase(),
+      userId: typeof t.user === "object" ? t.user?.email || t.user?._id?.toString() : t.user?.toString() || "Guest",
+      userName: typeof t.user === "object" ? t.user?.name || t.user?.email : "Guest",
+      network: "Wallet Top-up",
+      phone: t.paymentMethod?.toUpperCase() || "MOOLRE",
+      bundle: t.type === "topup" ? "Wallet Topup" : t.type,
+      amount: t.amount,
+      status: t.status === "success" ? "Success" : t.status === "failed" ? "Failed" : "Pending",
+      date: t.createdAt.toISOString(),
+      type: "topup",
+      paymentMethod: t.paymentMethod || "moolre",
+      description: t.description || "Wallet deposit",
     }));
 
-    return NextResponse.json(transactions);
-  } catch (error) {
+    return NextResponse.json(formattedTx);
+  } catch (error: any) {
     console.error("Transaction list error:", error);
-    return NextResponse.json({ message: "Error fetching transactions" }, { status: 500 });
+    return NextResponse.json({ message: "Error fetching transactions", details: error?.message }, { status: 500 });
   }
 }

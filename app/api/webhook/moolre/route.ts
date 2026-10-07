@@ -1,117 +1,121 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
-import Order from "@/lib/models/Order";
 import User from "@/lib/models/User";
+import Transaction from "@/lib/models/Transaction";
 import { MoolreWebhookPayload } from "@/lib/moolre";
 
+/**
+ * Moolre Payment Webhook Handler
+ * Endpoint: POST /api/webhook/moolre
+ * Docs: https://docs.moolre.com/ai/payment-webhook.html
+ */
 export async function POST(req: NextRequest) {
   try {
     const payload: MoolreWebhookPayload = await req.json().catch(() => null);
 
-    console.log("🔔 Received Moolre Webhook:", JSON.stringify(payload, null, 2));
+    console.log("🔔 Received Moolre Payment Webhook:", JSON.stringify(payload, null, 2));
 
-    if (!payload || typeof payload.status === "undefined") {
+    if (!payload || typeof payload.status === "undefined" || !payload.data) {
       return NextResponse.json(
         { status: 0, message: "Invalid or empty webhook payload" },
         { status: 400 }
       );
     }
 
-    const { status, code, message, data } = payload;
+    const { status, code, data } = payload;
 
-    const reference =
-      data?.externalref ||
-      data?.external_ref ||
-      data?.reference ||
-      data?.externalRef ||
-      data?.id;
+    // External Reference from Moolre webhook data
+    const reference = data?.externalref;
 
     if (!reference) {
-      console.warn("⚠️ Moolre Webhook received without reference/externalref in data.");
+      console.warn("⚠️ Moolre Webhook received without externalref in data.");
       return NextResponse.json(
-        { status: 0, message: "Missing transaction reference" },
+        { status: 0, message: "Missing transaction externalref" },
         { status: 400 }
       );
     }
 
     await dbConnect();
 
-    // 1 for success according to Moolre API spec
-    const isSuccess =
-      (status === 1 || status === "1") &&
-      (data?.txstatus === 1 || data?.txstatus === "1" || typeof data?.txstatus === "undefined");
+    // According to Moolre API spec:
+    // status === 1 (or "1") AND txstatus === 1 (or "1") represents a successful transaction
+    const isOverallSuccess = status === 1 || status === "1";
+    const isTxSuccess = data.txstatus === 1 || data.txstatus === "1";
+    const isSuccess = isOverallSuccess && isTxSuccess;
 
-    console.log(`Processing Moolre callback for reference [${reference}]. Status: ${status}, isSuccess: ${isSuccess}`);
+    console.log(
+      `Processing Moolre callback for externalref [${reference}]. Overall status: ${status}, txstatus: ${data.txstatus}, isSuccess: ${isSuccess}`
+    );
 
-    // Check if reference belongs to an Order
-    const order = await Order.findOne({
-      $or: [
-        { transaction_id: reference },
-        { transaction_id: `Paid_${reference}` },
-        { transaction_id: `paymentflaged_${reference}` },
-        { transaction_id: { $regex: reference, $options: "i" } },
-      ],
-    });
-
-    if (order) {
-      if (isSuccess) {
-        // If order was marked as flagged due to initial verification mismatch, unflag it
-        if (order.transaction_id.startsWith("paymentflaged_")) {
-          order.transaction_id = `Paid_${reference}`;
-        }
-        
-        // If order was failed or pending, update as needed
-        if (order.status === "failed") {
-          order.status = "pending";
-        }
-
-        await order.save();
-        console.log(`✅ Order [${order._id}] updated via Moolre Webhook. Status: ${order.status}`);
-      } else {
-        order.status = "failed";
-        await order.save();
-        console.log(`❌ Order [${order._id}] marked as failed via Moolre Webhook.`);
-      }
-
-      return NextResponse.json({
-        status: 1,
-        code: code || "P01",
-        message: "Webhook processed successfully for Order",
-        orderId: order._id.toString(),
-      });
-    }
-
-    // Check if reference belongs to a Wallet Topup
-    if (reference.startsWith("wallet_") || reference.startsWith("topup_")) {
+    // Process Wallet Topups (reference starts with "topup_" or "wallet_")
+    if (reference.startsWith("topup_") || reference.startsWith("wallet_")) {
       const parts = reference.split("_");
-      const userId = parts.length > 2 ? parts[2] : null;
+      // Extract userId (supports both "topup_USERID" and "topup_TIMESTAMP_USERID")
+      const userId = parts.length >= 2 ? parts[parts.length - 1] : null;
 
-      if (userId && isSuccess && data?.amount) {
-        const topupAmount = Number(data.amount);
-        const user = await User.findById(userId);
+      const rawAmount = data.value ?? data.amount;
+      const topupAmount = Number(rawAmount);
 
-        if (user) {
-          user.walletBalance = (user.walletBalance || 0) + topupAmount;
-          await user.save();
-          console.log(`💰 Wallet topup processed via Moolre Webhook for User [${userId}]: +${topupAmount}. New balance: ${user.walletBalance}`);
+      if (userId && isSuccess && topupAmount > 0) {
+        // Idempotency check: ensure this reference hasn't already been credited in Transaction model
+        const existingTransaction = await Transaction.findOne({ reference });
+        if (existingTransaction) {
+          console.log(`ℹ️ Wallet top-up reference [${reference}] already processed in Transaction model.`);
+          return NextResponse.json({
+            status: 1,
+            code: code || "P01",
+            message: "Wallet topup reference already processed",
+          });
+        }
+
+        // Perform ATOMIC increment on User walletBalance
+        const updatedUser = await User.findByIdAndUpdate(
+          userId,
+          { $inc: { walletBalance: topupAmount } },
+          { new: true }
+        );
+
+        if (updatedUser) {
+          // Record top-up in Transaction model
+          await Transaction.create({
+            user: userId,
+            reference: reference,
+            amount: topupAmount,
+            type: "topup",
+            paymentMethod: "moolre",
+            status: "success",
+            description: `Wallet top-up via Moolre (payer: ${data.payer || "N/A"})`,
+            metadata: {
+              payer: data.payer,
+              moolreTxId: data.transactionid,
+              accountnumber: data.accountnumber,
+              ts: data.ts,
+            },
+          });
+
+          console.log(
+            `💰 Wallet topup processed atomically into Transaction model for User [${userId}]: +₵${topupAmount}. New balance: ₵${updatedUser.walletBalance}`
+          );
 
           return NextResponse.json({
             status: 1,
             code: code || "P01",
             message: "Wallet topup processed successfully",
-            newBalance: user.walletBalance,
+            newBalance: updatedUser.walletBalance,
           });
+        } else {
+          console.warn(`⚠️ User [${userId}] not found during Moolre wallet topup webhook processing.`);
         }
       }
     }
 
-    console.log(`ℹ️ Moolre Webhook received for reference [${reference}], but no matching Order or User was found.`);
+    console.log(`ℹ️ Moolre Webhook received for externalref [${reference}], logged without error.`);
 
     return NextResponse.json({
       status: 1,
       code: code || "P01",
-      message: "Webhook received and logged",
-      reference,
+      message: "Webhook received and logged successfully",
+      externalref: reference,
     });
   } catch (error: any) {
     console.error("❌ Error processing Moolre Webhook:", error);

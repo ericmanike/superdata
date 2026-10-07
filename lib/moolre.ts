@@ -14,21 +14,28 @@ export interface MoolreStatusResponse {
   error?: string;
 }
 
+export interface MoolreWebhookData {
+  txstatus: number | string; // 1 (Successful), 0 (Pending), 2 (Failed)
+  payer?: string;
+  terminalid?: string;
+  accountnumber?: string;
+  name?: string;
+  amount?: number | string;
+  value?: number | string;
+  transactionid?: number | string;
+  externalref?: string;
+  thirdpartyref?: string;
+  secret?: string;
+  ts?: string;
+  [key: string]: any;
+}
+
 export interface MoolreWebhookPayload {
-  status?: number | string;
+  status: number | string;
   code?: string;
   message?: string;
-  data?: {
-    externalref?: string;
-    external_ref?: string;
-    reference?: string;
-    externalRef?: string;
-    id?: string;
-    txstatus?: number | string;
-    amount?: number | string;
-    [key: string]: any;
-  };
-  [key: string]: any;
+  data: MoolreWebhookData;
+  go?: any;
 }
 
 
@@ -47,7 +54,13 @@ export async function checkMoolreTransactionStatus(
     throw new Error("Moolre credentials (username/publicKey) missing in environment variables");
   }
 
-  const response = await fetch("https://api.moolre.com/open/transact/status", {
+  const baseUrl = (
+    process.env.MOOLRE_BASE_URL ||
+    process.env.NEXT_PUBLIC_MOOLRE_BASE_URL ||
+    "https://sandbox.moolre.com"
+  ).replace(/\/+$/, "");
+
+  const response = await fetch(`${baseUrl}/open/transact/status`, {
     method: "POST",
     headers: {
       "X-API-USER": username,

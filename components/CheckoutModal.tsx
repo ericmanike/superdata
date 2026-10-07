@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { toast , ToastContainer } from "react-toastify";
-import { Loader2, Smartphone, Wallet } from "lucide-react";
+import { Loader2,  Wallet } from "lucide-react";
 import MoolrePay from "@moolre/moolrejs";
 
 type ModalProps = {
@@ -259,10 +259,9 @@ export function CheckoutModal({ open, onClose, phone, onPhoneChange, summary }: 
 
         {/* Payment Buttons */}
         <div className="mt-5 space-y-2.5">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-            Select Payment Method
-          </p>
+         
 
+{/*
           <button
             onClick={handleMoolrePayment}
             disabled={isPaying}
@@ -278,6 +277,7 @@ export function CheckoutModal({ open, onClose, phone, onPhoneChange, summary }: 
               <span className="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded-md">Momo</span>
             )}
           </button>
+          */}
 
         
 
@@ -288,7 +288,7 @@ export function CheckoutModal({ open, onClose, phone, onPhoneChange, summary }: 
           >
             <div className="flex items-center space-x-3">
               <Wallet className="h-5 w-5 text-emerald-600" />
-              <span>Pay with Wallet Balance</span>
+              <span>Pay with Wallet</span>
             </div>
             {isPaying && activeMethod === "wallet" ? (
               <Loader2 className="h-4 w-4 animate-spin text-slate-600" />

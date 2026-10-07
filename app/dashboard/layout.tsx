@@ -48,6 +48,7 @@ const adminNavItems: NavItem[] = [
   { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard },
   { label: " Manage Packages", href: "/dashboard/admin/bundles", icon: Package },
   { label: " All Orders", href: "/dashboard/admin/orders", icon: ShoppingBag },
+  { label: " All Transactions", href: "/dashboard/admin/transactions", icon: Landmark },
   { label: "Manage Users", href: "/dashboard/admin/users", icon: Users },
   { label: "ADH Group Offers", href: "/dashboard/admin/adh-offers", icon: Tag },
 ];

@@ -41,8 +41,8 @@ export function MoolreModal({ open, onClose, phone, onPhoneChange, summary }: Mo
 
     setIsPaying(true);
     try {
-      const popup = new MoolrePay();
-      const reference = "MOOLRE_" + Date.now();
+      const popup = new MoolrePay(); 
+      const reference = "topup_"+ Date.now().toString()+"_" + session.user.id;
 
       await popup.checkout({
         username,
@@ -55,27 +55,9 @@ export function MoolreModal({ open, onClose, phone, onPhoneChange, summary }: Mo
         onSuccess: async (transaction: any) => {
           console.log("Moolre callback response:", transaction);
           try {
-            const res = await fetch("/api/orders", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                network: summary.network,
-                bundleName: summary.size.replace(/GB$/i, "").trim(),
-                price: summary.price,
-                phoneNumber: phone,
-                reference: transaction?.externalRef || reference,
-                paymentMethod: "moolre",
-              }),
-            });
+            
 
-            if (res.ok) {
-              toast.success("Purchase successful!");
-              window.location.href = "/dashboard/orders";
-            } else {
-              const err = await res.json();
-              toast.error("Error: " + (err.message || "Failed to process order"));
-              setIsPaying(false);
-            }
+            
           } catch (e) {
             console.error("Order completion error:", e);
             toast.error("Network error processing order");
@@ -85,6 +67,9 @@ export function MoolreModal({ open, onClose, phone, onPhoneChange, summary }: Mo
         onCancel: () => {
           console.log("Moolre payment cancelled");
           toast.info("Payment cancelled");
+          
+  console.log("Moolre checkout", reference);
+  alert(reference)
           setIsPaying(false);
         },
         onError: (err: any) => {
