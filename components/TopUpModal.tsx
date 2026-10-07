@@ -44,10 +44,10 @@ export function TopUpModal({ open, amount, onAmountChange, onPay, onClose, isLoa
           className="mt-5 w-full flex items-center justify-center rounded-xl bg-[#1e3a8a] px-4 py-3 text-sm font-semibold text-white disabled:bg-slate-400"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Pay with Paystack
+          Pay with Momo
         </button>
         <p className="mt-2 text-xs text-slate-500">
-          You will be redirected to Paystack to complete this payment securely.
+          You will be redirected to complete this payment securely.
         </p>
       </div>
     </div>

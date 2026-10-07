@@ -1,7 +1,7 @@
 "use client";
 
 import { BundleCard } from "@/components/BundleCard";
-import { PaystackModal } from "@/components/PaystackModal";
+import { CheckoutModal } from "@/components/CheckoutModal";
 import { useSession } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -33,6 +33,7 @@ export default function BuyDataPage() {
       });
   }, []);
 
+ 
   const filteredBundles = useMemo(() => {
     let list = Array.isArray(bundles) ? bundles : [];
     
@@ -101,7 +102,7 @@ export default function BuyDataPage() {
         </div>
       </div>
 
-      <PaystackModal
+      <CheckoutModal
         open={showPayModal && !!selectedBundle}
         onClose={() => setShowPayModal(false)}
         phone={phone}

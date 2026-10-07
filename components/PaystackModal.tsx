@@ -59,7 +59,7 @@ export function PaystackModal({ open, onClose, phone, onPhoneChange, summary }: 
       const handler = (window as any).PaystackPop.setup({
         key: paystackKey,
         email: session.user.email,
-        amount: Math.round((summary.price + summary.price * 0.02) * 100), // GHS to pesewas + 2% tax
+        amount: Math.round(summary.price * 100), // GHS to pesewas
         currency: "GHS",
         ref: "DATA_" + Date.now(),
         callback: function (response: any) {

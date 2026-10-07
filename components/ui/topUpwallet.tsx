@@ -1,22 +1,14 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { DollarSign } from 'lucide-react'
 import { useSession } from 'next-auth/react'
+import { toast } from 'react-toastify'
+import MoolrePay from '@moolre/moolrejs'
 import { TopUpModal } from '../TopUpModal'
 
 interface TopUpWalletProps {
   className?: string;
   children?: React.ReactNode;
-}
-
-declare global {
-  interface Window {
-    PaystackPop: {
-      setup: (options: any) => {
-        openIframe: () => void;
-      };
-    };
-  }
 }
 
 export default function TopUpWallet({ className, children }: TopUpWalletProps) {
@@ -25,93 +17,88 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
-  const loadPaystackScript = () => {
-    if (window.PaystackPop) return;
-    const script = document.createElement('script')
-    script.src = 'https://js.paystack.co/v1/inline.js'
-    script.async = true
-    document.body.appendChild(script)
-  }
-
-  useEffect(() => {
-    loadPaystackScript()
-  }, [])
-
-  const handleTopUp = () => {
-    if (!session) {
-      alert('Please login to continue')
+  const handleTopUp = async () => {
+    if (!session?.user?.email) {
+      toast.error('Please login to continue')
       return;
     }
 
     const amountNum = parseFloat(amount)
     if (!amountNum || amountNum <= 0) {
-      alert('Please enter a valid amount')
+      toast.error('Please enter a valid amount')
+      return;
+    }
+
+    const username = process.env.NEXT_PUBLIC_MOOLRE_USERNAME || process.env.MOOLRE_USERNAME || "";
+    const publicKey = process.env.NEXT_PUBLIC_MOOLRE_PK || process.env.NEXT_PUBLIC_MOOLRE_PUBLIC_KEY || process.env.MOOLRE_PK || "";
+    const accountNumber = process.env.NEXT_PUBLIC_MOOLRE_ACCOUNT_NUMBER || process.env.MOOLRE_ACCOUNT_NUMBER || "";
+
+    if (!publicKey || !username || !accountNumber) {
+      toast.error("Moolre payment configuration missing. Please check credentials.");
       return;
     }
 
     setIsLoading(true);
     try {
-      const reference = Date.now().toString()
-      const paystackKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+      const popup = new MoolrePay();
+      const userId = (session.user as any)?.id || 'user';
+      const reference = `wallet_${Date.now()}_${userId}`;
 
-      if (!paystackKey) {
-        console.error('Paystack public key not found')
-        alert('Payment system configuration missing. Please contact support.')
-        setIsLoading(false);
-        return;
-      }
+      await popup.checkout({
+        username,
+        publicKey,
+        accountNumber,
+        amount: amountNum,
+        email: session.user.email,
+        externalRef: reference,
+        currency: "GHS",
+        onSuccess: async (transaction: any) => {
+          console.log("Moolre wallet topup callback:", transaction);
+          try {
+            const verifyResponse = await fetch('/api/topupWallet', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                amount: amountNum,
+                reference: transaction?.externalRef || reference,
+              }),
+            });
 
-      if (!window.PaystackPop) {
-        console.error('Paystack script not loaded');
-        alert('Payment gateway is still loading. Please wait a moment.')
-        setIsLoading(false);
-        return;
-      }
-
-      const handler = window.PaystackPop.setup({
-        key: paystackKey,
-        email: session?.user?.email!,
-        currency: 'GHS',
-        amount: Math.round((amountNum + (amountNum * 0.02)) * 100), // Convert to pesewas (GHS)
-        ref: reference,
-        onClose: () => {
-          console.log('Payment closed');
-          setIsLoading(false);
-        },
-        callback: function (response: any) {
-          (async () => {
-            try {
-              const verifyResponse = await fetch('/api/topupWallet', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  email: session?.user?.email!,
-                  amount: amountNum,
-                  reference,
-                }),
-              });
-
-              if (verifyResponse.ok) {
-                console.log('Payment verified');
-                window.location.reload();
-              } else {
-                console.error('Payment verification failed');
-                alert('Payment verification failed. Please contact support.');
-                setIsLoading(false);
-              }
-            } catch (err) {
-              console.error('Error verifying payment', err);
+            if (verifyResponse.ok) {
+              const data = await verifyResponse.json().catch(() => ({}));
+              toast.success(data.message || 'Wallet topped up successfully!');
+              setIsOpen(false);
+              window.location.reload();
+            } else {
+              const err = await verifyResponse.json().catch(() => ({}));
+              console.error('Wallet topup verification failed:', err);
+              toast.error(err.message || 'Wallet topup verification failed');
               setIsLoading(false);
             }
-          })();
+          } catch (err) {
+            console.error('Error verifying wallet topup:', err);
+            toast.error('Network error verifying wallet topup');
+            setIsLoading(false);
+          }
         },
-      })
-
-      handler.openIframe()
-      // Keep state true until one of the callbacks is fired
+        onCancel: () => {
+          console.log('Moolre payment cancelled');
+          toast.info('Payment cancelled');
+          setIsLoading(false);
+        },
+        onError: (err: any) => {
+          console.error('Moolre payment error:', err);
+          toast.error('Error processing Moolre payment');
+          setIsLoading(false);
+        },
+        onClose: () => {
+          console.log('Moolre window closed');
+          setIsLoading(false);
+        },
+      });
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong with the payment process.");
+      console.error('Moolre setup error:', error);
+      toast.error("Error initializing Moolre payment system");
       setIsLoading(false);
     }
   }
@@ -141,4 +128,4 @@ export default function TopUpWallet({ className, children }: TopUpWalletProps) {
       )}
     </>
   )
-}
+}

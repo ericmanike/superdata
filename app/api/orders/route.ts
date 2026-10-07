@@ -3,7 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import dbConnect from "@/lib/mongoose";
 import Order from "@/lib/models/Order";
-
+import Setting from "@/lib/models/Setting";
+import { checkMoolreTransactionStatus, pollMoolreTransactionStatus } from "@/lib/moolre";
+import { placeADHOrder } from "@/lib/adhgroupAPIs";
 
 export async function GET() {
   try {
@@ -129,11 +131,6 @@ export async function PATCH(req: Request) {
 
 
 
-
-
-
-
-
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -141,17 +138,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    // const ip = session.user.id;
-    // console.log(  'order rate limit identifier:', ip)
-    // const { success } = await orderRateLimit.limit(ip);
+  
 
-    // if (!success) {
-    //   return NextResponse.json({ message: "Too many order attempts. Please try again later." }, { status: 429 });
-    // }
+    const body = await req.json();
+    const { network, bundleName, price, phoneNumber, reference, paymentMethod } = body;
 
-    const { network, bundleName, price, phoneNumber, reference } = await req.json();
-
-    console.log('Received data:', { network, bundleName, price, phoneNumber, reference });
+    console.log('Received data:', { network, bundleName, price, phoneNumber, reference, paymentMethod });
 
     if (!network || !bundleName || !price || !phoneNumber || !reference) {
       return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
@@ -164,68 +156,8 @@ export async function POST(req: Request) {
     if (existingOrder) {
       return NextResponse.json({ message: "Duplicate transaction reference" }, { status: 409 });
     }     
-    
 
-    const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
-    const DAKAZI_API_KEY = process.env.DAKAZI_API_KEY
-
-    if (!PAYSTACK_SECRET_KEY || !DAKAZI_API_KEY) {
-      //console.log('Paystack secret key not found')
-      return NextResponse.json({ message: "unexpected error occurred" }, { status: 500 });
-    }
-
-    let networkId;
-    if (network === "MTN") {
-      networkId = 3;
-    } else if (network === "TELECEL") {
-      networkId = 2;
-    } else if (network.startsWith("AT")) {
-      networkId = 4;
-    } else {
-      return NextResponse.json({ message: "Invalid network" }, { status: 400 });
-    }
-
-    console.log('Network ID:', networkId);
-    if (!networkId) {
-      return NextResponse.json({ message: "Invalid network" }, { status: 400 });
-    }
-
-
-
-    const verifyResponse = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-      headers: {
-        Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
-      },
-    })
-
-    const paystackData = await verifyResponse.json()
-
-    //  console.log('Payment verification response:', paystackData)
-    if (!paystackData.data) {
-      console.log('Payment verification failed no data')
-      return NextResponse.json({ message: "Payment verification failed" }, { status: 400 });
-    }
-
-    const { amount } = paystackData.data
-    
-            const tax = 0.02 * price
-            let total = price + tax
-            console.log('Total before rounding:', total)
-            total = Math.round(total * 100)/100
-            console.log('Total after rounding:', total)
- 
-       console.log('Payment amount:', amount / 100)
-
-    if (amount / 100 !== Number(total)) {
-      console.log('Payment amount does not match')
-      return NextResponse.json({ message: "Payment amount does not match" }, { status: 400 });
-    }
-
-     if (paystackData.data.status !== 'success') {
-      console.log('Payment verification failed')
-      return NextResponse.json({ message: "Payment verification failed" }, { status: 400 });
-    }
-
+  
 
      const order = await Order.create({
       user: session.user.id,
@@ -237,44 +169,104 @@ export async function POST(req: Request) {
       status: 'pending',
     });
 
-    //place order
-    // const placeOrder = await fetch(
-    //   "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
-    //   {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       "x-api-key": `${DAKAZI_API_KEY}`,
-    //     },
-    //     body: JSON.stringify({
-    //       recipient_msisdn: phoneNumber,
-    //       network_id: networkId,
-    //       shared_bundle: Number(bundleName),
-    //       incoming_api_ref: reference
-    //     })
-    //   }
-    // );
+    // Fetch active provider setting ('dakazina' or 'adhGroup')
+    const providerSetting = await Setting.findOne({ key: "activeProvider" });
+    const activeProvider = providerSetting?.value || "dakazina";
+    console.log("Fulfilling order via active provider:", activeProvider);
 
-    // const Orderres = await placeOrder.json().catch(() => {});
-    // console.log('Raw response:', Orderres);
+    if (activeProvider === "adhGroup") {
+      let adhNetwork = "mtn";
+      let offerSlug = "mtn_data_bundle";
+      const upperNet = network.toUpperCase();
 
-    // if (!placeOrder.ok) {
+      if (upperNet === "MTN") {
+        adhNetwork = "mtn";
+        offerSlug = "mtn_data_bundle";
+      } else if (upperNet === "TELECEL") {
+        adhNetwork = "telecel";
+        offerSlug = "telecel_data_bundle";
+      } else if (upperNet.startsWith("AT") || upperNet.includes("AIRTEL")) {
+        adhNetwork = "at";
+        offerSlug = "at_data_bundle";
+      }
 
-    //   return NextResponse.json({ error: ' could not place an order' }, { status: 500 });
+      const numericVolume = parseFloat(String(bundleName).replace(/[^0-9.]/g, "")) || 1;
 
-    // }
+      try {
+        const adhRes = await placeADHOrder(adhNetwork, {
+          type: "single",
+          volume: numericVolume,
+          phone: phoneNumber.trim(),
+          offerSlug: offerSlug,
+        });
 
+        console.log("ADH Order response:", adhRes);
+        if (adhRes.success) {
+          const transaction_id = adhRes.orderId || adhRes.reference || `ADH_${Date.now()}`;
+          await Order.findByIdAndUpdate(order._id, { transaction_id });
+          console.log("📦 New ADH order created:", order);
+          return NextResponse.json({ message: "Order created successfully", order }, { status: 201 });
+        } else {
+          console.error("ADH Order failed:", adhRes);
+          return NextResponse.json({ error: adhRes.message || adhRes.error || "Could not place order with ADH Group" }, { status: 500 });
+        }
+      } catch (adhErr: any) {
+        console.error("ADH Order error:", adhErr);
+        return NextResponse.json({ error: adhErr.message || "Failed to contact ADH Group provider" }, { status: 500 });
+      }
+    } else if (activeProvider === "dakazina") {
 
+    const DAKAZI_API_KEY = process.env.DAKAZI_API_KEY;
+    if (!DAKAZI_API_KEY) {
+      return NextResponse.json({ message: "unexpected error occurred" }, { status: 500 });
+    }
 
-    // console.log(' purchase order response:', Orderres)
+    let networkId;
+    if (network.toUpperCase() === "MTN") {
+      networkId = 3;
+    } else if (network.toUpperCase() === "TELECEL") {
+      networkId = 2;
+    } else if (network.toUpperCase().startsWith("AT") || network.toUpperCase().includes("AIRTEL")) {
+      networkId = 4;
+    } else {
+      return NextResponse.json({ message: "Invalid network" }, { status: 400 });
+    }
 
-    const transaction_id = `TXT - ${Date.now()}`
-     await Order.findByIdAndUpdate(order._id, { transaction_id });    
+    console.log('Network ID:', networkId);
+    if (!networkId) {
+      return NextResponse.json({ message: "Invalid network" }, { status: 400 });
+    }
+      // Fulfill via Dakazi API
+      const placeOrder = await fetch(
+        "https://reseller.dakazinabusinessconsult.com/api/v1/buy-data-package",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": `${DAKAZI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            recipient_msisdn: phoneNumber,
+            network_id: networkId,
+            shared_bundle: parseInt(bundleName),
+            incoming_api_ref: reference,
+          }),
+        }
+      );
 
-   
+      const Orderres = await placeOrder.json().catch(() => ({}));
+      console.log("Raw response from Dakazi:", Orderres);
 
-    console.log('📦 New order created:', order);
-    return NextResponse.json({ message: "Order created successfully", order }, { status: 201 });
+      if (!placeOrder.ok) {
+        return NextResponse.json({ error: Orderres.message || "Could not place order with Dakazi" }, { status: 500 });
+      }
+
+      const transaction_id = Orderres.transaction_code || `TXT - ${Date.now()}`;
+      await Order.findByIdAndUpdate(order._id, { transaction_id });
+
+      console.log("📦 New Dakazi order created:", order);
+      return NextResponse.json({ message: "Order created successfully", order }, { status: 201 });
+    }
   } catch (error) {
     console.error("Order creation error:", error);
     return NextResponse.json({ message: "Error creating order" }, { status: 500 });

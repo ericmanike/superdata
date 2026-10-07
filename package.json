@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@moolre/moolrejs": "^1.0.2",
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "lucide-react": "^0.577.0",
